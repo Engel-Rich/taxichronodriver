@@ -30,7 +30,7 @@ class Authservices extends ChangeNotifier {
           userName: value.user!.displayName!,
           userTelephone: " ",
         );
-        await ApplicationUser.currentUser().then((value) {
+        await ApplicationUser.currentUserFuture().then((value) {
           if (value != null) {
           } else {
             applicationUser.saveUser();

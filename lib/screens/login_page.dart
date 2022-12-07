@@ -201,7 +201,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: () async {
                     await Authservices().googlesingIn().whenComplete(() async {
-                      final currentUser = await ApplicationUser.currentUser();
+                      final currentUser =
+                          await ApplicationUser.currentUserFuture();
                       if (currentUser!.userTelephone!.trim().isEmpty) {
                         Navigator.of(context).pop();
                         Navigator.of(context).push(PageTransition(
@@ -273,25 +274,26 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 30),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: DelayedAnimation(
-                    delay: 2450,
-                    child: Text(
-                      "SAUTER",
-                      style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+
+              // Align(
+              //   alignment: Alignment.centerRight,
+              //   child: TextButton(
+              //     onPressed: () {
+              //       Navigator.pop(context);
+              //     },
+              //     child: DelayedAnimation(
+              //       delay: 2450,
+              //       child: Text(
+              //         "SAUTER",
+              //         style: GoogleFonts.poppins(
+              //           color: Colors.black,
+              //           fontSize: 16,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

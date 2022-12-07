@@ -80,13 +80,13 @@ class _SideBarState extends State<SideBar> {
               : const SizedBox.shrink(),
           ListTile(
             leading: const Icon(Icons.history),
-            title: Text('Mes Requetes', style: police),
+            title: Text('Mes Courses', style: police),
             onTap: () {},
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.panorama_fish_eye_rounded),
-            title: Text('Packages', style: police),
+            title: Text('Statistiques', style: police),
             onTap: () {
               if (isConnected) {
                 Navigator.of(context).push(PageTransition(

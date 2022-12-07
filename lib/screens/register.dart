@@ -51,7 +51,7 @@ class _SignupPageState extends State<SignupPage> {
                     DelayedAnimation(
                       delay: 1500,
                       child: Text(
-                        "Formulaire d'enregistrement",
+                        "Formulaire d'enregistrement chauffeur",
                         style: GoogleFonts.poppins(
                           color: dredColor,
                           fontSize: 25,
@@ -63,7 +63,7 @@ class _SignupPageState extends State<SignupPage> {
                     DelayedAnimation(
                       delay: 2500,
                       child: Text(
-                        "  Enregistrez vous et commencer a profiter de nos différents packages et disponibilités pour vos multiples déplacements.",
+                        "Enregistrez vous et commencer a recevoir les demandes de course de nos clients.",
                         style: GoogleFonts.poppins(
                           color: Colors.grey[600],
                           fontSize: 16,
@@ -180,6 +180,21 @@ class _SignupPageState extends State<SignupPage> {
         const SizedBox(height: 10),
         DelayedAnimation(
           delay: 3500,
+          child: TextFormField(
+            style: police,
+            decoration: InputDecoration(
+              icon: const Icon(Icons.person),
+              hintStyle: police,
+              labelText: 'Votre Prenom',
+              labelStyle: TextStyle(
+                color: grey,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        DelayedAnimation(
+          delay: 3500,
           child: InternationalPhoneNumberInput(
             onInputChanged: (number) {},
             hintText: "Votre Numéro de téléphone",
@@ -204,6 +219,36 @@ class _SignupPageState extends State<SignupPage> {
               icon: const Icon(Icons.email),
               hintStyle: police,
               labelText: 'Votre e-mail',
+              labelStyle: TextStyle(
+                color: grey,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        DelayedAnimation(
+          delay: 3500,
+          child: TextFormField(
+            style: police,
+            decoration: InputDecoration(
+              icon: const Icon(Icons.person),
+              hintStyle: police,
+              labelText: 'Votre Numero de Permis',
+              labelStyle: TextStyle(
+                color: grey,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        DelayedAnimation(
+          delay: 3500,
+          child: TextFormField(
+            style: police,
+            decoration: InputDecoration(
+              icon: const Icon(Icons.person),
+              hintStyle: police,
+              labelText: 'Votre Numero de CNI',
               labelStyle: TextStyle(
                 color: grey,
               ),

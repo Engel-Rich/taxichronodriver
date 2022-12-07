@@ -45,7 +45,7 @@ class GooGleMapServices {
     return true;
   }
 
-  static requestLocation() async {
+  static Future requestLocation() async {
     final hasPermission = await _handleLocationPermission();
     if (!hasPermission) return false;
     activelocation();

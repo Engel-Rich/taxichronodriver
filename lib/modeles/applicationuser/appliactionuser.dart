@@ -75,7 +75,19 @@ class ApplicationUser {
       .snapshots()
       .map((user) => ApplicationUser.fromJson(user.data()!));
 
-  static Future<ApplicationUser?> currentUser() async {
+  static Stream<ApplicationUser?>? currentUser() {
+    try {
+      return firestore
+          .collection('Utilisateur')
+          .doc(authentication.currentUser!.uid)
+          .snapshots()
+          .map((user) => ApplicationUser.fromJson(user.data()!));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<ApplicationUser?> currentUserFuture() async {
     try {
       return firestore
           .collection('Utilisateur')

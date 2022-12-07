@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taxischronodriver/firebase_options.dart';
+import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/screens/homepage.dart';
+import 'package:taxischronodriver/screens/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,13 +19,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'TaxisChrono',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(),
-    );
+    return StreamBuilder<ApplicationUser?>(
+        stream: ApplicationUser.currentUser(),
+        builder: (context, snapshot) {
+          return GetMaterialApp(
+            title: 'TaxisChrono',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            home: snapshot.data == null ? const LoginPage() : const HomePage(),
+          );
+        });
   }
 }

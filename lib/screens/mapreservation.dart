@@ -109,7 +109,7 @@ class _MapReservationState extends State<MapReservation> {
                             text: 'Valider la commande',
                             action: () async {
                               final applicationUser =
-                                  await ApplicationUser.currentUser();
+                                  await ApplicationUser.currentUserFuture();
                               if (applicationUser == null) {
                                 getsnac(
                                     title: "Echec de la commande",
