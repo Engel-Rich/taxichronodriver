@@ -26,275 +26,282 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white.withOpacity(0),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.close,
-            color: Colors.black,
-            size: 30,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  vertical: 40,
-                  horizontal: 30,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DelayedAnimation(
-                      delay: 1500,
-                      child: Text(
-                        "Connecter l'adresse e-mail",
-                        style: GoogleFonts.poppins(
-                          color: Colors.amber.shade900,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w600,
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   backgroundColor: Colors.white.withOpacity(0),
+      //   leading: IconButton(
+      //     icon: const Icon(
+      //       Icons.close,
+      //       color: Colors.black,
+      //       size: 30,
+      //     ),
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //   ),
+      // ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 40,
+                    horizontal: 30,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DelayedAnimation(
+                        delay: 1500,
+                        child: Text(
+                          "Connecter l'adresse e-mail",
+                          style: GoogleFonts.poppins(
+                            color: Colors.amber.shade900,
+                            fontSize: 25,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 22),
-                    DelayedAnimation(
-                      delay: 2000,
-                      child: Text(
-                        "Il est recommandé de vous connecter avec votre adresse e-mail pour mieux protéger vos informations.",
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: 22),
+                      DelayedAnimation(
+                        delay: 2000,
+                        child: Text(
+                          "Il est recommandé de vous connecter avec votre adresse e-mail pour mieux protéger vos informations.",
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              spacerHeight(30),
-              loginForm(),
-              spacerHeight(30),
-              DelayedAnimation(
-                delay: 2500,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 1,
-                      shape: const StadiumBorder(),
-                      backgroundColor: dredColor,
-                      padding: const EdgeInsets.symmetric(
-                        // horizontal: 125,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: Text(
-                      'CONFIRMER',
-                      style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 4),
-                    ),
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        await Authservices()
-                            .login(controllerEmail.text, controllerPasswor.text)
-                            .then((login) {
-                          switch (login) {
-                            case null:
-                              Navigator.of(context).pop();
-                              setState(() {});
-                              break;
-                            case "network-request-failed":
-                              getsnac(
-                                title: "Erreur de connexion",
-                                msg:
-                                    'Erreur de connexion internet veillez vérifier votre connexion internet puis reéssayer',
-                              );
-                              break;
-                            case 'user-not-found':
-                              getsnac(
-                                title: "Erreur de connexion",
-                                msg:
-                                    'Aucun utilisateur avec cet email n\'a été trouvé',
-                              );
-                              break;
-                            case "wrong-password":
-                              getsnac(
-                                title: "Erreur de connexion",
-                                msg: 'Email ou mot de passe incorect',
-                              );
-                              break;
-                            default:
-                              getsnac(
-                                title: "Erreur de connexion : $login",
-                                msg: 'Veillez reéssayer',
-                              );
-                          }
-                        });
-                      } else {}
-                    },
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              DelayedAnimation(
-                delay: 3000,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await Authservices().singInAppl().then((value) {
-                      if (value ==
-                          'l\'authentification avec apple n\'est pas disponible sur votre mobile') {
-                        getsnac(
-                            title: "Erreur d'hautentification",
-                            msg:
-                                "Modele de connexion Apple non disponible pour votre appareil");
-                      }
-                      switch (value) {
-                        case null:
-                          Navigator.of(context).pop();
-                          break;
-                        case "pas d'authorisation":
+                spacerHeight(30),
+                loginForm(),
+                spacerHeight(30),
+                DelayedAnimation(
+                  delay: 2500,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 1,
+                        shape: const StadiumBorder(),
+                        backgroundColor: dredColor,
+                        padding: const EdgeInsets.symmetric(
+                          // horizontal: 125,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: Text(
+                        'CONFIRMER',
+                        style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 4),
+                      ),
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          await Authservices()
+                              .login(
+                                  controllerEmail.text, controllerPasswor.text)
+                              .then((login) {
+                            switch (login) {
+                              case null:
+                                Navigator.of(context).pop();
+                                setState(() {});
+                                break;
+                              case "network-request-failed":
+                                getsnac(
+                                  title: "Erreur de connexion",
+                                  msg:
+                                      'Erreur de connexion internet veillez vérifier votre connexion internet puis reéssayer',
+                                );
+                                break;
+                              case 'user-not-found':
+                                getsnac(
+                                  title: "Erreur de connexion",
+                                  msg:
+                                      'Aucun utilisateur avec cet email n\'a été trouvé',
+                                );
+                                break;
+                              case "wrong-password":
+                                getsnac(
+                                  title: "Erreur de connexion",
+                                  msg: 'Email ou mot de passe incorect',
+                                );
+                                break;
+                              default:
+                                getsnac(
+                                  title: "Erreur de connexion : $login",
+                                  msg: 'Veillez reéssayer',
+                                );
+                            }
+                          });
+                        } else {}
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                DelayedAnimation(
+                  delay: 3000,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Authservices().singInAppl().then((value) {
+                        if (value ==
+                            'l\'authentification avec apple n\'est pas disponible sur votre mobile') {
                           getsnac(
                               title: "Erreur d'hautentification",
                               msg:
-                                  "Véillez autoriser l'authentification par email");
-                          break;
-                      }
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    backgroundColor: dredColor, //const Color(0xFF576dff),
-                    padding: const EdgeInsets.all(13),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const FaIcon(FontAwesomeIcons.apple, color: Colors.black),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Apple',
-                        style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                                  "Modele de connexion Apple non disponible pour votre appareil");
+                        }
+                        switch (value) {
+                          case null:
+                            Navigator.of(context).pop();
+                            break;
+                          case "pas d'authorisation":
+                            getsnac(
+                                title: "Erreur d'hautentification",
+                                msg:
+                                    "Véillez autoriser l'authentification par email");
+                            break;
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      backgroundColor: dredColor, //const Color(0xFF576dff),
+                      padding: const EdgeInsets.all(13),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FaIcon(FontAwesomeIcons.apple,
+                            color: Colors.black),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Apple',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              DelayedAnimation(
-                delay: 3500,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await Authservices().googlesingIn().whenComplete(() async {
-                      final currentUser =
-                          await ApplicationUser.currentUserFuture();
-                      if (currentUser!.userTelephone!.trim().isEmpty) {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).push(PageTransition(
-                            child:
-                                CompletteProfile(applicationUser: currentUser),
-                            type: PageTransitionType.fade));
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    backgroundColor: dredColor,
-                    padding: const EdgeInsets.all(13),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const FaIcon(FontAwesomeIcons.google,
-                          color: Colors.black),
-                      // Image.asset(
-                      //   'images/google.png',
-                      //   height: 20,
-                      // ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'GOOGLE',
-                        style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              spacerHeight(15),
-              DelayedAnimation(
-                delay: 2550,
-                child: SizedBox(
-                  width: double.infinity,
+                const SizedBox(height: 15),
+                DelayedAnimation(
+                  delay: 3500,
                   child: ElevatedButton(
+                    onPressed: () async {
+                      await Authservices()
+                          .googlesingIn()
+                          .whenComplete(() async {
+                        final currentUser =
+                            await ApplicationUser.currentUserFuture();
+                        if (currentUser!.userTelephone!.trim().isEmpty) {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(PageTransition(
+                              child: CompletteProfile(
+                                  applicationUser: currentUser),
+                              type: PageTransitionType.fade));
+                        } else {
+                          Navigator.of(context).pop();
+                        }
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       shape: const StadiumBorder(),
                       backgroundColor: dredColor,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.all(13),
                     ),
-                    child: Text(
-                      'Pas de compte? Creer le votre ici',
-                      style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignupPage(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FaIcon(FontAwesomeIcons.google,
+                            color: Colors.black),
+                        // Image.asset(
+                        //   'images/google.png',
+                        //   height: 20,
+                        // ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'GOOGLE',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
+                spacerHeight(15),
+                DelayedAnimation(
+                  delay: 2550,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                        backgroundColor: dredColor,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                      ),
+                      child: Text(
+                        'Pas de compte? Creer le votre ici',
+                        style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
 
-              // Align(
-              //   alignment: Alignment.centerRight,
-              //   child: TextButton(
-              //     onPressed: () {
-              //       Navigator.pop(context);
-              //     },
-              //     child: DelayedAnimation(
-              //       delay: 2450,
-              //       child: Text(
-              //         "SAUTER",
-              //         style: GoogleFonts.poppins(
-              //           color: Colors.black,
-              //           fontSize: 16,
-              //           fontWeight: FontWeight.w600,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ],
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(
+                //     onPressed: () {
+                //       Navigator.pop(context);
+                //     },
+                //     child: DelayedAnimation(
+                //       delay: 2450,
+                //       child: Text(
+                //         "SAUTER",
+                //         style: GoogleFonts.poppins(
+                //           color: Colors.black,
+                //           fontSize: 16,
+                //           fontWeight: FontWeight.w600,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
       ),

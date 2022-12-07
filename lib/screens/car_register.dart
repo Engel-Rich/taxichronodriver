@@ -3,14 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({super.key});
+class RequestCar extends StatefulWidget {
+  const RequestCar({super.key});
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  State<RequestCar> createState() => _RequestCarState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _RequestCarState extends State<RequestCar> {
   //  le debu du corps
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,6 @@ class _SignupPageState extends State<SignupPage> {
         ),
       ),
       body: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
@@ -115,7 +114,7 @@ class _SignupPageState extends State<SignupPage> {
           child: TextFormField(
             style: police,
             decoration: InputDecoration(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.car_rental),
               hintStyle: police,
               labelText: 'Numero De Chassi',
               labelStyle: TextStyle(
@@ -130,7 +129,7 @@ class _SignupPageState extends State<SignupPage> {
           child: TextFormField(
             style: police,
             decoration: InputDecoration(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.local_taxi_outlined),
               hintStyle: police,
               labelText: 'Model De Vehicule',
               labelStyle: TextStyle(
@@ -145,7 +144,7 @@ class _SignupPageState extends State<SignupPage> {
           child: TextFormField(
             style: police,
             decoration: InputDecoration(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.card_travel),
               hintStyle: police,
               labelText: 'Votre Numero de Plaque Immatriculation',
               labelStyle: TextStyle(
@@ -160,7 +159,7 @@ class _SignupPageState extends State<SignupPage> {
           child: TextFormField(
             style: police,
             decoration: InputDecoration(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.assured_workload),
               hintStyle: police,
               labelText: 'Votre Numero Assurance',
               labelStyle: TextStyle(
@@ -175,39 +174,9 @@ class _SignupPageState extends State<SignupPage> {
           child: TextFormField(
             style: police,
             decoration: InputDecoration(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.color_lens),
               hintStyle: police,
               labelText: 'Couleur du Vehicule',
-              labelStyle: TextStyle(
-                color: grey,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.person),
-              hintStyle: police,
-              labelText: 'Etat ',
-              labelStyle: TextStyle(
-                color: grey,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.person),
-              hintStyle: police,
-              labelText: 'Etat ',
               labelStyle: TextStyle(
                 color: grey,
               ),

@@ -25,8 +25,7 @@ class _HomePageState extends State<HomePage> {
   ///////////////.
   Completer controllerMap = Completer<GoogleMapController>();
   ScrollController controllerSlide = ScrollController();
-  // TextEditingController controllerdest = TextEditingController();
-  // String destination = '';
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool voirs = false;
   LatLng? location;
@@ -37,7 +36,6 @@ class _HomePageState extends State<HomePage> {
         location = GooGleMapServices.currentPosition;
       });
       debugPrint('current positions');
-      // print(GooGleMapServices.currentPlace!.toMap());
     });
   }
 

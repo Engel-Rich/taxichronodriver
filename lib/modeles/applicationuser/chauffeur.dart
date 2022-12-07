@@ -9,7 +9,7 @@ import 'package:taxischronodriver/varibles/variables.dart';
 class Chauffeur extends ApplicationUser {
   final String numeroPermi;
   final DateTime expirePermiDate;
-  String idVehicule;
+  String? idVehicule;
 
   Chauffeur({
     required super.userAdresse,
@@ -22,7 +22,7 @@ class Chauffeur extends ApplicationUser {
     super.userid,
     super.userProfile,
     required super.expireCniDate,
-    required this.idVehicule,
+    this.idVehicule,
     required this.numeroPermi,
     required this.expirePermiDate,
   });
