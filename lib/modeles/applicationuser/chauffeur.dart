@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/autres/reservation.dart';
 import 'package:taxischronodriver/modeles/autres/transaction.dart';
@@ -82,23 +81,20 @@ class Chauffeur extends ApplicationUser {
   }
 // crération des informations du chauffeurs.
 
-  static Stream<Chauffeur> chauffeurInfos(idChauffeur) {
-    late Map<String, dynamic> userMap;
-    late Map<String, dynamic> chauffeurMap;
-    return firestore
+  static Future<Chauffeur> chauffeurInfos(idChauffeur) async {
+    final userMap = await firestore
         .collection('Utilisateur')
         .doc(idChauffeur)
-        .snapshots()
-        .map((user) {
-      userMap = user.data()!;
-      debugPrint(
-          "Les informations provenant de la table Utilisateur sont : $userMap");
-      chauffeurCollection(idChauffeur).snapshots().map((event) {
-        chauffeurMap = event.data()!;
-        debugPrint(
-            'Les informations provenant de la table Chauffeur sont : $chauffeurMap');
-      });
-      return Chauffeur.fromJson(userMap: userMap, chauffeurMap: chauffeurMap);
+        .get()
+        .then((user) {
+      return user.data()!;
     });
+    final chauffeurMap =
+        await chauffeurCollection(idChauffeur).get().then((event) {
+      return event.data()!;
+    });
+    return Chauffeur.fromJson(userMap: userMap, chauffeurMap: chauffeurMap);
   }
+
+// fin de la classe
 }

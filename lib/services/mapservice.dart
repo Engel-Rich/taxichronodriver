@@ -22,53 +22,33 @@ class GooGleMapServices {
         debugPrint("your position : ${position!.toMap()}");
       });
 
-  static requestLocation(context) async {
-    bool serviceEnable = false;
-    try {
-      activelocation();
-    } catch (e) {
-      final permissions = await Geolocator.requestPermission();
-      if (permissions != LocationPermission.denied &&
-          permissions != LocationPermission.deniedForever) {
-        serviceEnable = await Geolocator.isLocationServiceEnabled();
-        if (serviceEnable) {
-          activelocation();
-        }
-      } else {
-        showModalBottomSheet(
-            barrierColor: Colors.black.withOpacity(0.4),
-            backgroundColor: Colors.transparent,
-            context: context,
-            builder: (context) {
-              return Container(
-                height: 350,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: blanc,
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(30)),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    boutonText(
-                        context: context,
-                        action: () async {
-                          await Geolocator.openLocationSettings();
-                        },
-                        text: "Paramètres"),
-                    spacerHeight(30),
-                    boutonText(
-                        context: context,
-                        action: () => Navigator.of(context).pop,
-                        text: "Annuler"),
-                  ],
-                ),
-              );
-            });
+  // handlerPermission
+
+  static Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return false;
       }
     }
+    if (permission == LocationPermission.deniedForever) {
+      return false;
+    }
+    return true;
+  }
+
+  static requestLocation() async {
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) return false;
+    activelocation();
   }
 
   // request User routes.

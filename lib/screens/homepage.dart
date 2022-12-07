@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   LatLng? location;
 
   fromCurrentPosition() async {
-    await GooGleMapServices.requestLocation(context).whenComplete(() {
+    await GooGleMapServices.requestLocation().whenComplete(() {
       setState(() {
         location = GooGleMapServices.currentPosition;
       });
