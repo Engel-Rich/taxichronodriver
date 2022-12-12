@@ -45,15 +45,15 @@ class ApplicationUser {
           expireCniDate: mapUser['expireCniDate']);
 
   Map<String, dynamic> toJson() => {
-        'userAdresse': userAdresse,
-        'userEmail': userEmail,
-        'userName': userName,
-        'userTelephone': userTelephone,
-        'userCni': userCni,
-        'userDescription': userDescription,
-        'userid': userid,
-        'userProfile': userProfile,
-        'ExpireCniDate': expireCniDate,
+        if (userAdresse != null) 'userAdresse': userAdresse,
+        if (userEmail != null) 'userEmail': userEmail,
+        if (userName != null) 'userName': userName,
+        if (userTelephone != null) 'userTelephone': userTelephone,
+        if (userCni != null) 'userCni': userCni,
+        if (userDescription != null) 'userDescription': userDescription,
+        if (userid != null) 'userid': userid,
+        if (userProfile != null) 'userProfile': userProfile,
+        if (expireCniDate != null) 'ExpireCniDate': expireCniDate,
       };
 
   Future saveUser() async {
@@ -99,9 +99,9 @@ class ApplicationUser {
     }
   }
 
-  login() {
+  login() async {
     if (authentication.currentUser == null) {
-      Authservices().login(userEmail, motDePasse);
+      await Authservices().login(userEmail, motDePasse);
     }
   }
 

@@ -6,41 +6,62 @@ class Vehicule {
   String imatriculation;
   String assurance;
   DateTime expirationAssurance;
-  bool etat;
-  LatLng position;
+  String chauffeurId;
+  bool statut;
+  LatLng? position;
 
   Vehicule({
     required this.assurance,
-    required this.etat,
     required this.expirationAssurance,
     required this.imatriculation,
     required this.numeroDeChassie,
-    required this.position,
+    this.position,
+    required this.chauffeurId,
+    required this.statut,
   });
 
   Map<String, dynamic> toMap() => {
         "assurance": assurance,
-        "etat": etat,
         "expirationAssurance": expirationAssurance,
         "imatriculation": imatriculation,
         "numeroDeChassie": numeroDeChassie,
-        "position": {
-          "latitude": position.latitude,
-          "longitude": position.longitude,
-        }
+        if (position != null)
+          "position": {
+            "latitude": position!.latitude,
+            "longitude": position!.longitude,
+          },
+        "statut": statut
       };
   factory Vehicule.froJson(map) => Vehicule(
+        chauffeurId: map['chauffeurId'],
         assurance: map['assurance'],
-        etat: map['etat'],
         expirationAssurance: map['expirationAssurance'],
         imatriculation: map['imatriculation'],
         numeroDeChassie: map["numeroDeChassie"],
         position:
             LatLng(map['position']['latitude'], map['position']['longitude']),
+        statut: map['statut'],
       );
 
-  setPosition(LatLng positionActuel) async {
-    await datatbase.ref("Vehicules").child(numeroDeChassie).update({
+// demande d'enrégistrement du véhicule
+  Future requestSave() async {
+    await datatbase
+        .ref("Vehicules")
+        .child(chauffeurId)
+        .get()
+        .then((value) async {
+      if (value.exists) {
+        return "véhicule déja existant";
+      } else {
+        await datatbase.ref("Vehicules").child(chauffeurId).set(toMap());
+        return true;
+      }
+    });
+  }
+
+// fonction de miseAjour de la position du chauffeur et ou du véhicule
+  static Future setPosition(LatLng positionActuel, String userId) async {
+    await datatbase.ref("Vehicules").child(userId).update({
       "position": {
         "latitude": positionActuel.latitude,
         "longitude": positionActuel.longitude,
@@ -48,12 +69,13 @@ class Vehicule {
     });
   }
 
-  requestSave() {}
+  //  actuellement en ligne ou or ligne
   setStatut(bool etatActuel) async {
     await datatbase
         .ref("Vehicules")
-        .child(numeroDeChassie)
-        .update({"etat": etatActuel});
+        .child(chauffeurId)
+        .update({"statut": etatActuel});
   }
+
   // fin de la classe
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:taxischronodriver/modeles/autres/vehicule.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
@@ -11,6 +12,13 @@ class RequestCar extends StatefulWidget {
 }
 
 class _RequestCarState extends State<RequestCar> {
+  TextEditingController controllerChassie = TextEditingController();
+  TextEditingController controllerassurance = TextEditingController();
+  TextEditingController controllerimat = TextEditingController();
+  TextEditingController controllermodele = TextEditingController();
+  TextEditingController controllerCouleur = TextEditingController();
+  final formkey = GlobalKey<FormState>();
+  DateTime? endAssurance;
   //  le debu du corps
   @override
   Widget build(BuildContext context) {
@@ -106,84 +114,141 @@ class _RequestCarState extends State<RequestCar> {
     );
   }
 
+  Future valideRequest() async {
+    if (formkey.currentState!.validate()) {
+      Vehicule vehicule = Vehicule(
+        assurance: controllerassurance.text,
+        expirationAssurance: endAssurance!,
+        imatriculation: controllerimat.text,
+        numeroDeChassie: controllerChassie.text,
+        chauffeurId: authentication.currentUser!.uid,
+        statut: false,
+      );
+    }
+  }
+
+// formulaire d'inscripttions
   Widget signupForm() {
-    return Column(
-      children: [
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.car_rental),
-              hintStyle: police,
-              labelText: 'Numero De Chassi',
-              labelStyle: TextStyle(
-                color: grey,
+    return Form(
+      key: formkey,
+      child: Column(
+        children: [
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              controller: controllerChassie,
+              validator: (value) {
+                return value != null || (value!.trim().isNotEmpty)
+                    ? value.length < 4
+                        ? "entrer un numéro de chassie valide"
+                        : null
+                    : 'veillez entrer un numéro de chassie';
+              },
+              style: police,
+              decoration: InputDecoration(
+                icon: const Icon(Icons.car_rental),
+                hintStyle: police,
+                labelText: 'Numero De Chassi',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.local_taxi_outlined),
-              hintStyle: police,
-              labelText: 'Model De Vehicule',
-              labelStyle: TextStyle(
-                color: grey,
+          const SizedBox(height: 10),
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              controller: controllermodele,
+              validator: (value) {
+                return value != null || (value!.trim().isNotEmpty)
+                    ? value.length < 2
+                        ? "un modèle valide"
+                        : null
+                    : 'veillez entrer le modèle de votre véhicule';
+              },
+              style: police,
+              decoration: InputDecoration(
+                icon: const Icon(Icons.local_taxi_outlined),
+                hintStyle: police,
+                labelText: 'Model De Vehicule',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.card_travel),
-              hintStyle: police,
-              labelText: 'Votre Numero de Plaque Immatriculation',
-              labelStyle: TextStyle(
-                color: grey,
+          const SizedBox(height: 10),
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              controller: controllerimat,
+              validator: (value) {
+                return value != null || (value!.trim().isNotEmpty)
+                    ? value.length < 4
+                        ? "entrer une immatriculation valide valide"
+                        : null
+                    : 'veillez entrer une immatriculation';
+              },
+              style: police,
+              decoration: InputDecoration(
+                icon: const Icon(Icons.card_travel),
+                hintStyle: police,
+                labelText: 'Votre Numero de Plaque Immatriculation',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.assured_workload),
-              hintStyle: police,
-              labelText: 'Votre Numero Assurance',
-              labelStyle: TextStyle(
-                color: grey,
+          const SizedBox(height: 10),
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              controller: controllerassurance,
+              validator: (value) {
+                return value != null || (value!.trim().isNotEmpty)
+                    ? value.length < 4
+                        ? "entrer un numéro d'assurance valide"
+                        : null
+                    : 'veillez entrer un numéro d\'assurance';
+              },
+              style: police,
+              decoration: InputDecoration(
+                icon: const Icon(Icons.assured_workload),
+                hintStyle: police,
+                labelText: 'Votre Numero Assurance',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        DelayedAnimation(
-          delay: 3500,
-          child: TextFormField(
-            style: police,
-            decoration: InputDecoration(
-              icon: const Icon(Icons.color_lens),
-              hintStyle: police,
-              labelText: 'Couleur du Vehicule',
-              labelStyle: TextStyle(
-                color: grey,
+          const SizedBox(height: 10),
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              controller: controllerCouleur,
+              validator: (value) {
+                return value != null || (value!.trim().isNotEmpty)
+                    ? value.length < 3
+                        ? "entrer une couleur valide"
+                        : null
+                    : 'veillez entrer un numéro de chassie';
+              },
+              style: police,
+              decoration: InputDecoration(
+                icon: const Icon(Icons.color_lens),
+                hintStyle: police,
+                labelText: 'Couleur du Vehicule',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

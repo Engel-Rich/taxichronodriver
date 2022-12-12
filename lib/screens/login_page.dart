@@ -151,103 +151,103 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                DelayedAnimation(
-                  delay: 3000,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await Authservices().singInAppl().then((value) {
-                        if (value ==
-                            'l\'authentification avec apple n\'est pas disponible sur votre mobile') {
-                          getsnac(
-                              title: "Erreur d'hautentification",
-                              msg:
-                                  "Modele de connexion Apple non disponible pour votre appareil");
-                        }
-                        switch (value) {
-                          case null:
-                            Navigator.of(context).pop();
-                            break;
-                          case "pas d'authorisation":
-                            getsnac(
-                                title: "Erreur d'hautentification",
-                                msg:
-                                    "Véillez autoriser l'authentification par email");
-                            break;
-                        }
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: const StadiumBorder(),
-                      backgroundColor: dredColor, //const Color(0xFF576dff),
-                      padding: const EdgeInsets.all(13),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const FaIcon(FontAwesomeIcons.apple,
-                            color: Colors.black),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Apple',
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                DelayedAnimation(
-                  delay: 3500,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await Authservices()
-                          .googlesingIn()
-                          .whenComplete(() async {
-                        final currentUser =
-                            await ApplicationUser.currentUserFuture();
-                        if (currentUser!.userTelephone!.trim().isEmpty) {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push(PageTransition(
-                              child: CompletteProfile(
-                                  applicationUser: currentUser),
-                              type: PageTransitionType.fade));
-                        } else {
-                          Navigator.of(context).pop();
-                        }
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: const StadiumBorder(),
-                      backgroundColor: dredColor,
-                      padding: const EdgeInsets.all(13),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const FaIcon(FontAwesomeIcons.google,
-                            color: Colors.black),
-                        // Image.asset(
-                        //   'images/google.png',
-                        //   height: 20,
-                        // ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'GOOGLE',
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                spacerHeight(15),
+                // DelayedAnimation(
+                //   delay: 3000,
+                //   child: ElevatedButton(
+                //     onPressed: () async {
+                //       await Authservices().singInAppl().then((value) {
+                //         if (value ==
+                //             'l\'authentification avec apple n\'est pas disponible sur votre mobile') {
+                //           getsnac(
+                //               title: "Erreur d'hautentification",
+                //               msg:
+                //                   "Modele de connexion Apple non disponible pour votre appareil");
+                //         }
+                //         switch (value) {
+                //           case null:
+                //             Navigator.of(context).pop();
+                //             break;
+                //           case "pas d'authorisation":
+                //             getsnac(
+                //                 title: "Erreur d'hautentification",
+                //                 msg:
+                //                     "Véillez autoriser l'authentification par email");
+                //             break;
+                //         }
+                //       });
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       shape: const StadiumBorder(),
+                //       backgroundColor: dredColor, //const Color(0xFF576dff),
+                //       padding: const EdgeInsets.all(13),
+                //     ),
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         const FaIcon(FontAwesomeIcons.apple,
+                //             color: Colors.black),
+                //         const SizedBox(width: 10),
+                //         Text(
+                //           'Apple',
+                //           style: GoogleFonts.poppins(
+                //             color: Colors.black,
+                //             fontSize: 16,
+                //             fontWeight: FontWeight.w500,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 15),
+                // DelayedAnimation(
+                //   delay: 3500,
+                //   child: ElevatedButton(
+                //     onPressed: () async {
+                //       await Authservices()
+                //           .googlesingIn()
+                //           .whenComplete(() async {
+                //         final currentUser =
+                //             await ApplicationUser.currentUserFuture();
+                //         if (currentUser!.userTelephone!.trim().isEmpty) {
+                //           Navigator.of(context).pop();
+                //           Navigator.of(context).push(PageTransition(
+                //               child: CompletteProfile(
+                //                   applicationUser: currentUser),
+                //               type: PageTransitionType.fade));
+                //         } else {
+                //           Navigator.of(context).pop();
+                //         }
+                //       });
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       shape: const StadiumBorder(),
+                //       backgroundColor: dredColor,
+                //       padding: const EdgeInsets.all(13),
+                //     ),
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         const FaIcon(FontAwesomeIcons.google,
+                //             color: Colors.black),
+                //         // Image.asset(
+                //         //   'images/google.png',
+                //         //   height: 20,
+                //         // ),
+                //         const SizedBox(width: 10),
+                //         Text(
+                //           'GOOGLE',
+                //           style: GoogleFonts.poppins(
+                //             color: Colors.black,
+                //             fontSize: 16,
+                //             fontWeight: FontWeight.w500,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // spacerHeight(15),
                 DelayedAnimation(
                   delay: 2550,
                   child: SizedBox(
