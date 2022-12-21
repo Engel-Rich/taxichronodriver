@@ -105,4 +105,8 @@ class TransactionApp {
       });
     }
   }
+
+// fin de la classe
 }
+
+// la transaction a quatres état qui sont {0: validé, 1:en cours, -1: annulé, 2:terminé}

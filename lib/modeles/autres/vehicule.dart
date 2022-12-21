@@ -1,4 +1,6 @@
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:taxischronodriver/controllers/vehiculecontroller.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 class Vehicule {
@@ -7,7 +9,8 @@ class Vehicule {
   String assurance;
   DateTime expirationAssurance;
   String chauffeurId;
-  bool statut;
+  bool
+      statut; // permet de verifier que le vehicule est soit en ligne soit hors ligne.
   LatLng? position;
 
   Vehicule({
@@ -22,7 +25,7 @@ class Vehicule {
 
   Map<String, dynamic> toMap() => {
         "assurance": assurance,
-        "expirationAssurance": expirationAssurance,
+        "expirationAssurance": expirationAssurance.millisecondsSinceEpoch,
         "imatriculation": imatriculation,
         "numeroDeChassie": numeroDeChassie,
         if (position != null)
@@ -30,12 +33,14 @@ class Vehicule {
             "latitude": position!.latitude,
             "longitude": position!.longitude,
           },
-        "statut": statut
+        "statut": statut,
+        'chauffeurId': chauffeurId,
       };
   factory Vehicule.froJson(map) => Vehicule(
         chauffeurId: map['chauffeurId'],
         assurance: map['assurance'],
-        expirationAssurance: map['expirationAssurance'],
+        expirationAssurance:
+            DateTime.fromMicrosecondsSinceEpoch(map['expirationAssurance']),
         imatriculation: map['imatriculation'],
         numeroDeChassie: map["numeroDeChassie"],
         position:
@@ -45,16 +50,23 @@ class Vehicule {
 
 // demande d'enrégistrement du véhicule
   Future requestSave() async {
+    print(toMap());
     await datatbase
         .ref("Vehicules")
         .child(chauffeurId)
         .get()
         .then((value) async {
       if (value.exists) {
-        return "véhicule déja existant";
+        return "véhicule déja existant ce véhicule existe déjà";
       } else {
-        await datatbase.ref("Vehicules").child(chauffeurId).set(toMap());
-        return true;
+        return await datatbase
+            .ref("Vehicules")
+            .child(chauffeurId)
+            .set(toMap())
+            .then((value) {
+          Get.find<VehiculeController>().currentVehicul.value = this;
+          return true;
+        });
       }
     });
   }
@@ -77,5 +89,13 @@ class Vehicule {
         .update({"statut": etatActuel});
   }
 
+  static Stream<Vehicule> vehiculeStrem(idchau) =>
+      datatbase.ref("Vehicules").child(idchau).onValue.map((event) {
+        return Vehicule.froJson(event.snapshot.value);
+      });
+  static Future<Vehicule> vehiculeFuture(idchau) =>
+      datatbase.ref("Vehicules").child(idchau).get().then((event) {
+        return Vehicule.froJson(event.value);
+      });
   // fin de la classe
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:taxischronodriver/modeles/autres/vehicule.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
+import 'package:taxischronodriver/screens/homepage.dart';
+import 'package:taxischronodriver/services/mapservice.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 class RequestCar extends StatefulWidget {
@@ -18,7 +22,7 @@ class _RequestCarState extends State<RequestCar> {
   TextEditingController controllermodele = TextEditingController();
   TextEditingController controllerCouleur = TextEditingController();
   final formkey = GlobalKey<FormState>();
-  DateTime? endAssurance;
+
   //  le debu du corps
   @override
   Widget build(BuildContext context) {
@@ -26,16 +30,16 @@ class _RequestCarState extends State<RequestCar> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white.withOpacity(0),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.close,
-            color: Colors.black,
-            size: 30,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(
+        //     Icons.close,
+        //     color: Colors.black,
+        //     size: 30,
+        //   ),
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        // ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -85,24 +89,31 @@ class _RequestCarState extends State<RequestCar> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 1,
-                          shape: const StadiumBorder(),
-                          backgroundColor: dredColor,
-                          padding: const EdgeInsets.symmetric(
-                            // horizontal: 125,
-                            vertical: 12,
-                          ),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 1,
+                        shape: const StadiumBorder(),
+                        backgroundColor: dredColor,
+                        padding: const EdgeInsets.symmetric(
+                          // horizontal: 125,
+                          vertical: 12,
                         ),
-                        child: Text(
-                          'ENREGISTRER',
-                          style: GoogleFonts.poppins(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 4),
+                      ),
+                      child: Text(
+                        'ENREGISTRER',
+                        style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 4),
+                      ),
+                      onPressed: () async => await valideRequest().then(
+                        (value) => Navigator.of(context).pushReplacement(
+                          PageTransition(
+                              child: const HomePage(),
+                              type: PageTransitionType.leftToRight),
                         ),
-                        onPressed: () {}),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -118,12 +129,26 @@ class _RequestCarState extends State<RequestCar> {
     if (formkey.currentState!.validate()) {
       Vehicule vehicule = Vehicule(
         assurance: controllerassurance.text,
-        expirationAssurance: endAssurance!,
+        expirationAssurance: expireassurance!,
         imatriculation: controllerimat.text,
         numeroDeChassie: controllerChassie.text,
         chauffeurId: authentication.currentUser!.uid,
         statut: false,
+        position: GooGleMapServices.currentPosition,
       );
+      await vehicule.requestSave().then((value) {
+        print(value);
+        if (value == true) {
+          Navigator.of(context).pushReplacement(
+            PageTransition(
+              child: const HomePage(),
+              type: PageTransitionType.leftToRight,
+            ),
+          );
+        } else if (value == "véhicule déja existant ce véhicule existe déjà") {
+          getsnac(title: "Erreur d'enrégistrement ", msg: "$value");
+        }
+      });
     }
   }
 
@@ -133,6 +158,7 @@ class _RequestCarState extends State<RequestCar> {
       key: formkey,
       child: Column(
         children: [
+          // le numéro de chassie
           DelayedAnimation(
             delay: 3500,
             child: TextFormField(
@@ -156,6 +182,8 @@ class _RequestCarState extends State<RequestCar> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // le modèle du véhicule
           DelayedAnimation(
             delay: 3500,
             child: TextFormField(
@@ -179,6 +207,8 @@ class _RequestCarState extends State<RequestCar> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // la plaque d'imatricularion
           DelayedAnimation(
             delay: 3500,
             child: TextFormField(
@@ -202,6 +232,8 @@ class _RequestCarState extends State<RequestCar> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // numéro d'assurance
           DelayedAnimation(
             delay: 3500,
             child: TextFormField(
@@ -225,6 +257,48 @@ class _RequestCarState extends State<RequestCar> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // date d'expiration de l'assurance
+          DelayedAnimation(
+            delay: 3500,
+            child: TextFormField(
+              style: police,
+              controller: controllerExpirAssurance,
+              validator: (val) {
+                return val == null || expireassurance == null
+                    ? "entrezla date d'expiration du permis"
+                    : null;
+              },
+              onTap: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(
+                    const Duration(days: 365 * 5),
+                  ),
+                ).then((value) {
+                  if (value == null) return;
+                  setState(() {
+                    expireassurance = value;
+                    controllerExpirAssurance.text =
+                        DateFormat("EEE d MM y").format(expireassurance!);
+                  });
+                  FocusScope.of(context).unfocus();
+                });
+              },
+              decoration: InputDecoration(
+                icon: const Icon(Icons.date_range),
+                hintStyle: police,
+                labelText: 'La date d\'expiration du permi.',
+                labelStyle: TextStyle(
+                  color: grey,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // couleur du véhicule
           DelayedAnimation(
             delay: 3500,
             child: TextFormField(
@@ -251,4 +325,7 @@ class _RequestCarState extends State<RequestCar> {
       ),
     );
   }
+
+  DateTime? expireassurance;
+  TextEditingController controllerExpirAssurance = TextEditingController();
 }

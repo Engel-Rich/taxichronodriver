@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
+import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 
 import '../varibles/variables.dart';
 
 class OtpPage extends StatefulWidget {
-  final Chauffeur chauffeur;
+  final Chauffeur? chauffeur;
   final String verificationId;
+  final String? phone;
+  final bool isauthentication;
   const OtpPage(
-      {super.key, required this.chauffeur, required this.verificationId});
+      {super.key,
+      this.chauffeur,
+      this.phone,
+      required this.verificationId,
+      required this.isauthentication});
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -21,10 +28,18 @@ class _OtpPageState extends State<OtpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: dredColor, size: 27),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 70, horizontal: 30),
+            margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -51,11 +66,13 @@ class _OtpPageState extends State<OtpPage> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                spacerHeight(15),
+                spacerHeight(5),
                 DelayedAnimation(
                   delay: 2000,
                   child: Text(
-                    "${widget.chauffeur.userTelephone}",
+                    widget.chauffeur != null
+                        ? "${widget.chauffeur!.userTelephone}"
+                        : "${widget.phone}",
                     style: police.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -64,7 +81,7 @@ class _OtpPageState extends State<OtpPage> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                spacerHeight(30),
+                spacerHeight(50),
                 DelayedAnimation(
                   delay: 2500,
                   child: Pinput(
@@ -84,20 +101,26 @@ class _OtpPageState extends State<OtpPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 120),
                 DelayedAnimation(
                     delay: 3000,
                     child: boutonText(
                         context: context,
                         action: () {
-                          Chauffeur chauffeur = widget.chauffeur;
                           if (smsCode.length == 6) {
-                            Chauffeur.validateOPT(
-                              chauffeur,
-                              context,
-                              smsCode: smsCode,
-                              verificationId: widget.verificationId,
-                            );
+                            if (widget.isauthentication) {
+                              ApplicationUser.validateOPT(context,
+                                  smsCode: smsCode,
+                                  verificationId: widget.verificationId);
+                            } else {
+                              Chauffeur chauffeur = widget.chauffeur!;
+                              Chauffeur.validateOPT(
+                                chauffeur,
+                                context,
+                                smsCode: smsCode,
+                                verificationId: widget.verificationId,
+                              );
+                            }
                           }
                         },
                         text: 'Valider'.toUpperCase())),

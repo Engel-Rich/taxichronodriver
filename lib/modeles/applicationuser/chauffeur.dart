@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/autres/reservation.dart';
 import 'package:taxischronodriver/modeles/autres/transaction.dart';
+import 'package:taxischronodriver/modeles/autres/vehicule.dart';
+import 'package:taxischronodriver/services/transitionchauffeur.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 // import 'package:taxischrono/varibles/variables.dart';
@@ -29,6 +34,8 @@ class Chauffeur extends ApplicationUser {
     this.passeword,
     required this.expirePermiDate,
   });
+
+  //  lq vqriqble active permet de se rassurer que le compte du chauffeur est paye
 
   static DocumentReference<Map<String, dynamic>> chauffeurCollection(
           String userId) =>
@@ -58,7 +65,12 @@ class Chauffeur extends ApplicationUser {
         await value.user!.updateDisplayName(chauffeurOtp.userName);
         await value.user!.updatePassword(chauffeurOtp.passeword!);
         await chauffeurOtp.saveUser().then((value) {
-          Navigator.of(context).pop();
+          Get.find<ChauffeurController>().applicationUser.value = chauffeurOtp;
+          Navigator.of(context).pushReplacement(PageTransition(
+              child: TransitionChauffeurVehicule(
+                applicationUser: chauffeurOtp,
+              ),
+              type: PageTransitionType.leftToRight));
         });
       }
     });
@@ -82,7 +94,10 @@ class Chauffeur extends ApplicationUser {
             await value.user!.updateEmail(chauffeurOtp.userEmail);
             await value.user!.updateDisplayName(chauffeurOtp.userName);
             await value.user!.updatePassword(chauffeurOtp.passeword!);
-            await chauffeurOtp.saveUser();
+            await chauffeurOtp.saveUser().then((value) {
+              Get.find<ChauffeurController>().applicationUser.value =
+                  chauffeurOtp;
+            });
           }
         });
       },
@@ -114,21 +129,29 @@ class Chauffeur extends ApplicationUser {
       );
   // la fonction d'acceptation de la commande
 
-  accepterLaCommande(Reservation reservation) {
-    TransactionApp transaction = TransactionApp(
-      idTansaction: DateTime.now().millisecondsSinceEpoch.toString(),
-      idclient: reservation.idClient,
-      dateAcceptation: DateTime.now(),
-      idChauffer: userid!,
-      idReservation: reservation.idReservation,
-      etatTransaction: 0,
-    );
-    reservation.updateAcceptedState(1);
-    transaction.valideTransaction();
+  static Future accepterLaCommande(Reservation reservation, chauffid) async {
+    await Reservation.acceptByChauffeur(chauffid, reservation).then((value) {
+      if (value != null && value['accept'] == true) {
+        TransactionApp transaction = TransactionApp(
+          idTansaction: DateTime.now().millisecondsSinceEpoch.toString(),
+          idclient: reservation.idClient,
+          dateAcceptation: DateTime.now(),
+          idChauffer: chauffid!,
+          idReservation: reservation.idReservation,
+          etatTransaction: 0,
+        );
+        transaction.valideTransaction();
+      }
+    });
+  }
+
+// refuser la commande
+  static Future refuserserunCommande(Reservation reservation, chauffid) async {
+    await Reservation.rejectByChauffeur(chauffid, reservation)
+        .then((value) => true);
   }
 
 // Enrégistrement du chauffeur
-
   @override
   saveUser() async {
     super.saveUser();
@@ -140,8 +163,8 @@ class Chauffeur extends ApplicationUser {
       }
     });
   }
-// crération des informations du chauffeurs.
 
+// modifier le statut du chauffeur s'il a ou non payé l'abonemet
   static Future setStatut(String userId, bool statut) async {
     await chauffeurCollection(userId).set({"statut": statut});
   }
@@ -181,12 +204,17 @@ class Chauffeur extends ApplicationUser {
   }
 
 // vérifier si l'utilisateur a un véhicule.
-
-  static Future<bool> havehicule(userid) async {
+  static Future<Vehicule?> havehicule(userid) async {
+    var result;
     await datatbase.ref("Vehicules").child(userid).get().then((value) {
-      if (value.exists) return true;
+      if (value.exists) {
+        // print(Vehicule.froJson(value.value).toMap());
+        result = Vehicule.froJson(value.value);
+      } else {
+        result = null;
+      }
     });
-    return false;
+    return result;
   }
 
 // fin de la classe

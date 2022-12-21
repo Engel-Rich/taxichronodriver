@@ -121,8 +121,9 @@ class _SideBarState extends State<SideBar> {
                   // ignore: avoid_returning_null_for_void
                   onTap: () async => isConnected
                       ? Authservices().logOut().then((value) {
+                          print("deconnexion");
                           Navigator.of(context).pop();
-                          // setState(() {});
+                          setState(() {});
                         })
                       : getsnac(
                           title: "DÉCONNEXION", msg: "Aucun compte connecté"),

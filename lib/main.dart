@@ -1,10 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:taxischronodriver/controllers/controllerbuilding.dart';
 import 'package:taxischronodriver/firebase_options.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
-import 'package:taxischronodriver/screens/car_register.dart';
-import 'package:taxischronodriver/screens/homepage.dart';
 import 'package:taxischronodriver/screens/login_page.dart';
 import 'package:taxischronodriver/services/transitionchauffeur.dart';
 
@@ -25,6 +24,7 @@ class MyApp extends StatelessWidget {
         stream: ApplicationUser.currentUser(),
         builder: (context, snapshot) {
           return GetMaterialApp(
+            initialBinding: ControllerBinding(),
             title: 'TaxisChrono',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(

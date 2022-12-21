@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get/get.dart' as getx;
+import 'package:shimmer/shimmer.dart';
 
 // google signin variable;
 
@@ -132,3 +133,14 @@ const String idServiceClient = "taxisChronoInccCenter";
 Size taille(BuildContext context) => MediaQuery.of(context).size;
 
 // adresse de la console google : https://console.cloud.google.com
+Widget shimmer(htr, lgr) => Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      direction: ShimmerDirection.ltr,
+      child: Container(
+        height: htr,
+        width: lgr,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12), color: Colors.white),
+      ),
+    );

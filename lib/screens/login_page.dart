@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:taxischronodriver/screens/completteprofile.dart';
+
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 import 'package:taxischronodriver/screens/register.dart';
 import 'package:taxischronodriver/services/firebaseauthservice.dart';
 
-import '../modeles/applicationuser/appliactionuser.dart';
 import '../varibles/variables.dart';
+import 'login_number.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -200,54 +200,38 @@ class _LoginPageState extends State<LoginPage> {
                 //   ),
                 // ),
                 // const SizedBox(height: 15),
-                // DelayedAnimation(
-                //   delay: 3500,
-                //   child: ElevatedButton(
-                //     onPressed: () async {
-                //       await Authservices()
-                //           .googlesingIn()
-                //           .whenComplete(() async {
-                //         final currentUser =
-                //             await ApplicationUser.currentUserFuture();
-                //         if (currentUser!.userTelephone!.trim().isEmpty) {
-                //           Navigator.of(context).pop();
-                //           Navigator.of(context).push(PageTransition(
-                //               child: CompletteProfile(
-                //                   applicationUser: currentUser),
-                //               type: PageTransitionType.fade));
-                //         } else {
-                //           Navigator.of(context).pop();
-                //         }
-                //       });
-                //     },
-                //     style: ElevatedButton.styleFrom(
-                //       shape: const StadiumBorder(),
-                //       backgroundColor: dredColor,
-                //       padding: const EdgeInsets.all(13),
-                //     ),
-                //     child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       children: [
-                //         const FaIcon(FontAwesomeIcons.google,
-                //             color: Colors.black),
-                //         // Image.asset(
-                //         //   'images/google.png',
-                //         //   height: 20,
-                //         // ),
-                //         const SizedBox(width: 10),
-                //         Text(
-                //           'GOOGLE',
-                //           style: GoogleFonts.poppins(
-                //             color: Colors.black,
-                //             fontSize: 16,
-                //             fontWeight: FontWeight.w500,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // spacerHeight(15),
+                DelayedAnimation(
+                  delay: 2500,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(PageTransition(
+                          child: const LoginNumber(),
+                          type: PageTransitionType.leftToRight));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      backgroundColor: dredColor,
+                      padding: const EdgeInsets.all(13),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FaIcon(FontAwesomeIcons.phone,
+                            color: Colors.black),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Numéro de téléphone',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                spacerHeight(15),
                 DelayedAnimation(
                   delay: 2550,
                   child: SizedBox(

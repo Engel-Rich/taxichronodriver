@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
+import 'package:taxischronodriver/screens/login_number.dart';
 import 'package:taxischronodriver/screens/otppage.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
@@ -35,36 +37,92 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscureconfirm = true;
 
   bool _obscureText = true;
-
+  final keyscafold = GlobalKey<ScaffoldState>();
   // function de validation du formulaire.
 
   chauffeurRegister() async {
     if (formKey.currentState!.validate()) {
-      Chauffeur chauffeur = Chauffeur(
-        userAdresse: controllerAdress.text,
-        userEmail: controlleremail.text,
-        userName: controllerNom.text,
-        active: false,
-        userTelephone: numberSubmited!.phoneNumber,
-        userCni: controllerCNI.text,
-        expireCniDate: expireCni,
-        passeword: controllerMotdePasse.text,
-        numeroPermi: controllerExpirPermi.text,
-        expirePermiDate: expirePermi,
-      );
-      await Chauffeur.loginNumber(
-        chauffeur,
-        context: context,
-        onCodeSend: (verificationId, forceResendingToken) {
-          Navigator.of(context).push(
-            PageTransition(
-              child:
-                  OtpPage(chauffeur: chauffeur, verificationId: verificationId),
-              type: PageTransitionType.leftToRight,
-            ),
+      await ApplicationUser.userExist(
+              userEmail: controlleremail.text,
+              userPhonNumber: numberSubmited!.phoneNumber)
+          .then((value) async {
+        if (value) {
+          FocusScope.of(keyscafold.currentContext!).unfocus();
+          keyscafold.currentState!.showBottomSheet((context) {
+            return Container(
+              height: 300,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30),
+                ),
+              ),
+              padding: const EdgeInsets.all(30),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                        "Un utilisateur ayant votre numéro de téléphone ou votre email existe déjà",
+                        style: police.copyWith(
+                            fontSize: 18, fontWeight: FontWeight.w800)),
+                    spacerHeight(30),
+                    boutonText(
+                        context: context,
+                        action: () {
+                          Navigator.of(context).pushReplacement(
+                            PageTransition(
+                                child: const LoginNumber(),
+                                type: PageTransitionType.leftToRight),
+                          );
+                        },
+                        text: "Connectez vous ??"),
+                    spacerHeight(15),
+                    boutonText(
+                        context: context,
+                        action: () {
+                          Navigator.of(context).pop();
+                        },
+                        text: "Annuler")
+                  ],
+                ),
+              ),
+            );
+          });
+        } else {
+          Chauffeur chauffeur = Chauffeur(
+            userAdresse: controllerAdress.text,
+            userEmail: controlleremail.text,
+            userName: controllerNom.text,
+            active: false,
+            userTelephone: numberSubmited!.phoneNumber,
+            userCni: controllerCNI.text,
+            expireCniDate: expireCni,
+            passeword: controllerMotdePasse.text,
+            numeroPermi: controllerExpirPermi.text,
+            expirePermiDate: expirePermi,
           );
-        },
-      );
+          await Chauffeur.loginNumber(
+            chauffeur,
+            context: context,
+            onCodeSend: (verificationId, forceResendingToken) {
+              Navigator.of(context).push(
+                PageTransition(
+                  child: OtpPage(
+                    chauffeur: chauffeur,
+                    verificationId: verificationId,
+                    isauthentication: false,
+                  ),
+                  type: PageTransitionType.leftToRight,
+                ),
+              );
+            },
+          );
+        }
+      });
+
       // await chauffeur.loginChauffeur(controllerMotdePasse.text).then((value) {
       //   if (value == null) {
       //     Navigator.of(context).pushReplacement(
@@ -111,6 +169,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
           )
         : Scaffold(
+            key: keyscafold,
             body: SafeArea(
               child: SingleChildScrollView(
                 // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,

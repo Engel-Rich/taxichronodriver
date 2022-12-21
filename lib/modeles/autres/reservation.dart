@@ -69,13 +69,14 @@ class Reservation {
     collection().set(tomap());
   }
 
+// changer l'atat d'une réservations.
   updateAcceptedState(int accept) async {
     await collection().update({"etatReservation": accept});
   }
 
+// anuller une réservation
   annuletReservation() async {
     updateAcceptedState(-1);
-    // final transactions =
     await firestore.collection("TransactionApp").get().then((value) {
       value.docs.map((tansaction) async {
         final transaction = TransactionApp.fromJson(tansaction.data());
@@ -86,5 +87,59 @@ class Reservation {
     });
   }
 
-// fin de la classe.
+// les reservations d'un chauffeurs en course.
+
+  static Stream<List<Reservation>> listReservationChauffeur(idchauffeur) =>
+      firestore
+          .collection("Courses")
+          .doc(idchauffeur)
+          .collection("Request")
+          .orderBy("dateReservation")
+          .snapshots()
+          .map((event) => event.docs
+              .map((resevation) => Reservation.fromJson(resevation.data()))
+              .toList());
+
+  // fontion d'émission de la requette à un chauffeur particulier;
+  static sendToChauffeur(idchauffeur, Reservation reservation) async {
+    await firestore
+        .collection('Courses')
+        .doc(idchauffeur)
+        .collection("Request")
+        .doc(reservation.idReservation)
+        .set(reservation.tomap());
+  }
+
+  // fonction de réfus d'une reservation par un chaufeur.
+  static Future<Map<String, bool>?> rejectByChauffeur(
+      idchauffeur, Reservation reservation) async {
+    await suprimeraRservationChezUnChaufeur(idchauffeur, reservation)
+        .then((value) => {'reject': true});
+    return null;
+  }
+
+  static Future<Map<String, bool>?> acceptByChauffeur(
+      idchauffeur, Reservation reservation) async {
+    await suprimeraRservationChezUnChaufeur(idchauffeur, reservation)
+        .then((value) {
+      reservation.updateAcceptedState(1);
+      return {'accept': true};
+    });
+    return null;
+  }
+
+// suprimer la  réservation de la collection d'un chauffeur
+  static Future suprimeraRservationChezUnChaufeur(
+      idchauffeur, Reservation reservation) async {
+    await firestore
+        .collection('Courses')
+        .doc(idchauffeur)
+        .collection("Request")
+        .doc(reservation.idReservation)
+        .delete();
+  }
+
+  // fin de la classe.
 }
+
+//  la reservation a trois état {1:eccepté, 0: en requette, -1: annulé}

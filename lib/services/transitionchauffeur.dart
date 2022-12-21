@@ -1,11 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/car_register.dart';
 import 'package:taxischronodriver/screens/homepage.dart';
+import 'package:taxischronodriver/services/mapservice.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
+
+import '../controllers/vehiculecontroller.dart';
 
 class TransitionChauffeurVehicule extends StatefulWidget {
   final ApplicationUser applicationUser;
@@ -21,20 +26,25 @@ class _TransitionChauffeurVehiculeState
   bool haveVehicule = false;
   bool isEmailVerified = authentication.currentUser!.emailVerified;
   haveCar() async {
-    if (await Chauffeur.havehicule(authentication.currentUser!.uid)) {
-      setState(() => haveVehicule = true);
-    }
+    await Chauffeur.havehicule(authentication.currentUser!.uid).then((value) {
+      if (value != null) {
+        print(value.toMap());
+        setState(() => haveVehicule = true);
+      }
+      {
+        print('don\'t have car');
+      }
+    });
   }
 
   Timer? timer;
   @override
   void initState() {
-    // timer = Timer.periodic(
-    //     const Duration(seconds: 3), (_) => checkVerificationEmail());
-    // if (!isEmailVerified) {
-    sendVerificationEmail();
-    // }
     haveCar();
+    Get.put<VehiculeController>(VehiculeController());
+    Get.put<ChauffeurController>(ChauffeurController());
+    GooGleMapServices.requestLocation();
+
     super.initState();
   }
 
