@@ -24,14 +24,14 @@ class GooGleMapServices {
 
   // handlerPermission
 
-  static Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
+  static Future<bool> handleLocationPermission() async {
+    // bool serviceEnabled;
     LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return false;
-    }
+    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   return false;
+    // }
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -46,7 +46,7 @@ class GooGleMapServices {
   }
 
   static Future requestLocation() async {
-    final hasPermission = await _handleLocationPermission();
+    final hasPermission = await handleLocationPermission();
     if (!hasPermission) return false;
     activelocation();
   }

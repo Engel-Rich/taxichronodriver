@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -25,13 +29,6 @@ final police = GoogleFonts.poppins(fontSize: 14);
 // les variables pour l'OTP
 var smsCode = "";
 // const
-const etatReservation = {0: "en attente", 1: "accepté", -1: "Annuleé"};
-const etatTransaction = {
-  0: 'initier',
-  1: "terminer",
-  -1: "Annulé",
-  2: "en cours"
-};
 
 // la snackbar des infos
 getsnac(
@@ -69,6 +66,7 @@ getsnac(
 Widget boutonText(
         {required BuildContext context,
         required void Function()? action,
+        Color? couleur,
         required String text}) =>
     SizedBox(
       width: double.infinity,
@@ -76,7 +74,7 @@ Widget boutonText(
         onPressed: action,
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.all(12),
-          backgroundColor: dredColor,
+          backgroundColor: couleur ?? dredColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -87,6 +85,8 @@ Widget boutonText(
         ),
       ),
     );
+
+//  les champs d'entré unpeu commun
 TextFormField champsdeRecherche(
         {required void Function(String value)? changement,
         required String hintext,
@@ -144,3 +144,84 @@ Widget shimmer(htr, lgr) => Shimmer.fromColors(
             borderRadius: BorderRadius.circular(12), color: Colors.white),
       ),
     );
+
+// fonction retournant la distance en Kilomètre entre deux points
+double calculateDistance(LatLng start, LatLng end) {
+  var lat1 = start.latitude;
+  var lon1 = start.longitude;
+  var lat2 = end.latitude;
+  var lon2 = end.longitude;
+  var p = 0.017453292519943295;
+  var a = 0.5 -
+      cos((lat2 - lat1) * p) / 2 +
+      cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
+  return 12742 * asin(sqrt(a));
+}
+
+getPolilineLines(LatLng start, LatLng end, PolylinePoints polylinePoints,
+    Map<PolylineId, Polyline> polylinesSets) async {
+  // PolylineResult polylineResult =
+  List<LatLng> polylineCoordinates = [];
+  await polylinePoints
+      .getRouteBetweenCoordinates(
+    mapApiKey,
+    PointLatLng(start.latitude, start.longitude),
+    PointLatLng(end.latitude, end.longitude),
+    travelMode: TravelMode.driving,
+  )
+      .then(
+    (value) {
+      if (value.points.isNotEmpty) {
+        for (var element in value.points) {
+          polylineCoordinates.add(LatLng(element.latitude, element.longitude));
+        }
+      } else {
+        debugPrint(value.errorMessage);
+      }
+
+      addpolylinespoints(polylineCoordinates, polylinesSets);
+    },
+  );
+}
+
+addpolylinespoints(List<LatLng> listlatlng, polylinesSets) async {
+  PolylineId id = const PolylineId("poly");
+  Polyline polyline = Polyline(
+    polylineId: id,
+    points: listlatlng,
+    color: Colors.blueAccent.shade200,
+    width: 5,
+  );
+  polylinesSets[id] = polyline;
+}
+
+boobtomshet(
+        {required GlobalKey<ScaffoldState> keys,
+        required double hei,
+        required Widget child}) =>
+    keys.currentState!.showBottomSheet((context) {
+      return Container(
+        height: hei,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(child: child),
+      );
+    });
+
+class LoadingComponen extends StatelessWidget {
+  const LoadingComponen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SpinKitRipple(
+        color: dredColor,
+        size: 150,
+        borderWidth: 5,
+      ),
+    );
+  }
+}

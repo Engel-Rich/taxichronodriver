@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:taxischronodriver/screens/homepage.dart';
+import 'package:taxischronodriver/screens/otppage.dart';
 
 import '../modeles/applicationuser/appliactionuser.dart';
 import '../varibles/variables.dart';
@@ -112,7 +115,7 @@ class _CompletteProfileState extends State<CompletteProfile> {
                             ),
                           ),
                           child: Text(
-                            'INSCRIPTION',
+                            'VALIDER',
                             style: police.copyWith(
                                 letterSpacing: 4,
                                 fontSize: 15,
@@ -121,22 +124,52 @@ class _CompletteProfileState extends State<CompletteProfile> {
                           ),
                           onPressed: () async {
                             if (formKey.currentState!.validate()) {
-                              final applicationUser = ApplicationUser(
-                                userAdresse: controllerAdresse.text,
-                                userEmail: widget.applicationUser.userEmail,
-                                userName: widget.applicationUser.userName,
-                                userTelephone: controllerPhone.text,
-                                userProfile: widget.applicationUser.userProfile,
-                                userDescription:
-                                    widget.applicationUser.userDescription,
-                                userid: widget.applicationUser.userid,
-                                userCni: widget.applicationUser.userCni,
-                                expireCniDate:
-                                    widget.applicationUser.expireCniDate,
-                              );
-                              await applicationUser.saveUser().then((value) {
-                                Navigator.pop(context);
-                              });
+                              authentication.verifyPhoneNumber(
+                                  verificationCompleted: (credential) async {
+                                    await authentication.currentUser!
+                                        .updatePhoneNumber(credential);
+                                    final applicationUser = ApplicationUser(
+                                      userAdresse: controllerAdresse.text,
+                                      userEmail:
+                                          widget.applicationUser.userEmail,
+                                      userName: widget.applicationUser.userName,
+                                      userTelephone: controllerPhone.text,
+                                      userProfile:
+                                          widget.applicationUser.userProfile,
+                                      userDescription: widget
+                                          .applicationUser.userDescription,
+                                      userid: widget.applicationUser.userid,
+                                      userCni: widget.applicationUser.userCni,
+                                      expireCniDate:
+                                          widget.applicationUser.expireCniDate,
+                                    );
+                                    await applicationUser
+                                        .saveUser()
+                                        .then((value) {
+                                      Navigator.pushAndRemoveUntil(
+                                          context,
+                                          PageTransition(
+                                              child: const HomePage(),
+                                              type: PageTransitionType
+                                                  .leftToRight),
+                                          (route) => false);
+                                    });
+                                  },
+                                  verificationFailed: (exception) {
+                                    getsnac(
+                                        title: "Erreur de vérification",
+                                        msg: exception.code);
+                                  },
+                                  timeout: const Duration(seconds: 60),
+                                  codeSent:
+                                      (verificationId, forresendIdTokend) {
+                                    Navigator.of(context).push(PageTransition(
+                                        child: OtpPage(
+                                            verificationId: verificationId,
+                                            isauthentication: true),
+                                        type: PageTransitionType.leftToRight));
+                                  },
+                                  codeAutoRetrievalTimeout: (val) {});
                             }
                           }),
                     ),

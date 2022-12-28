@@ -112,11 +112,16 @@ class ApplicationUser {
 // Utilisateur courant dans l'application
   static Stream<ApplicationUser?>? currentUser() {
     try {
-      return firestore
-          .collection('Utilisateur')
-          .doc(authentication.currentUser!.uid)
-          .snapshots()
-          .map((user) => ApplicationUser.fromJson(user.data()!));
+      return authentication.authStateChanges().map(
+            (user) => user == null
+                ? null
+                : ApplicationUser(
+                    userEmail: user.email!,
+                    userName: user.displayName!,
+                    userTelephone: user.phoneNumber,
+                    userid: user.uid,
+                  ),
+          );
     } catch (e) {
       return null;
     }

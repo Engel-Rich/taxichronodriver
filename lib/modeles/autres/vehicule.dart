@@ -8,6 +8,9 @@ class Vehicule {
   String imatriculation;
   String assurance;
   DateTime expirationAssurance;
+  bool isActive;
+  DateTime activeEndDate;
+
   String chauffeurId;
   bool
       statut; // permet de verifier que le vehicule est soit en ligne soit hors ligne.
@@ -18,7 +21,9 @@ class Vehicule {
     required this.expirationAssurance,
     required this.imatriculation,
     required this.numeroDeChassie,
+    required this.isActive,
     this.position,
+    required this.activeEndDate,
     required this.chauffeurId,
     required this.statut,
   });
@@ -28,6 +33,8 @@ class Vehicule {
         "expirationAssurance": expirationAssurance.millisecondsSinceEpoch,
         "imatriculation": imatriculation,
         "numeroDeChassie": numeroDeChassie,
+        "isActive": isActive,
+        "activeEndDate": activeEndDate.millisecondsSinceEpoch,
         if (position != null)
           "position": {
             "latitude": position!.latitude,
@@ -37,6 +44,9 @@ class Vehicule {
         'chauffeurId': chauffeurId,
       };
   factory Vehicule.froJson(map) => Vehicule(
+        activeEndDate:
+            DateTime.fromMillisecondsSinceEpoch(map["activeEndDate"]),
+        isActive: map["isActive"] ?? false,
         chauffeurId: map['chauffeurId'],
         assurance: map['assurance'],
         expirationAssurance:
@@ -86,7 +96,17 @@ class Vehicule {
     await datatbase
         .ref("Vehicules")
         .child(chauffeurId)
-        .update({"statut": etatActuel});
+        .update({"statut": etatActuel}).then((value) async {
+      if (statut == false) {
+        await firestore.collection('Courses').doc(chauffeurId).delete();
+      }
+    });
+  }
+
+  setActiveState(bool etatActuel) async {
+    await datatbase.ref("Vehicules").child(chauffeurId).update({
+      "isActive": etatActuel,
+    });
   }
 
   static Stream<Vehicule> vehiculeStrem(idchau) =>
@@ -97,5 +117,6 @@ class Vehicule {
       datatbase.ref("Vehicules").child(idchau).get().then((event) {
         return Vehicule.froJson(event.value);
       });
+
   // fin de la classe
 }

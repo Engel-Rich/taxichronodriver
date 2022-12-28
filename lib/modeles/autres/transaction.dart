@@ -14,7 +14,7 @@ class TransactionApp {
   final int etatTransaction;
   String? commentaireClientSurLeChauffeur;
   String? commentaireChauffeurSurLeClient;
-  int? noteChauffeur;
+  double? noteChauffeur;
 
   TransactionApp({
     required this.idTansaction,
@@ -53,25 +53,30 @@ class TransactionApp {
   factory TransactionApp.fromJson(Map<String, dynamic> transaction) =>
       TransactionApp(
         idTansaction: transaction['idTansaction'],
-        idclient: transaction['idclient'],
-        idChauffer: transaction['idChauffer'],
+        idclient: transaction['idClient'],
+        idChauffer: transaction['idChauffeur'],
         dateAcceptation:
             (transaction['dateAcceptation'] as fst.Timestamp).toDate(),
         idReservation: transaction['idReservation'],
-        tempsDepart: (transaction['tempsDepart'] as fst.Timestamp).toDate(),
-        tempsArrive: (transaction['tempsArrive'] as fst.Timestamp).toDate(),
-        noteChauffeur: transaction['noteChauffeur'],
+        tempsDepart: transaction['tempsDepart'] == null
+            ? null
+            : (transaction['tempsDepart'] as fst.Timestamp).toDate(),
+        tempsArrive: transaction['tempsArrive'] == null
+            ? null
+            : (transaction['tempsArrive'] as fst.Timestamp).toDate(),
+        noteChauffeur: transaction['noteChauffeur'] ?? 2.5,
         commentaireChauffeurSurLeClient:
             transaction["commentaireChauffeurSurLeClient"],
         commentaireClientSurLeChauffeur:
             transaction['commentaireClientSurLeChauffeur'],
         etatTransaction: (transaction['etatTransaction']),
-        tempsAnnulation:
-            (transaction['tempsAnnulation'] as fst.Timestamp).toDate(),
+        tempsAnnulation: transaction['tempsAnnulation'] == null
+            ? null
+            : (transaction['tempsAnnulation'] as fst.Timestamp).toDate(),
       );
 
   // Validation de la transaction
-  valideTransaction() async {
+  Future valideTransaction() async {
     await collection().set(tomap());
   }
 
@@ -88,12 +93,12 @@ class TransactionApp {
   }
 
   modifierEtat(int etat) async {
-    if (etat == 2) {
+    if (etat == 1) {
       await collection().update({
         "etatTransaction": etat,
         "tempsDepart": fst.FieldValue.serverTimestamp()
       });
-    } else if (etat == 1) {
+    } else if (etat == 2) {
       await collection().update({
         "etatTransaction": etat,
         "tempsArrive": fst.FieldValue.serverTimestamp(),
@@ -106,6 +111,26 @@ class TransactionApp {
     }
   }
 
+  static Stream<List<TransactionApp>> currentTransaction(iduser) => firestore
+      .collection("TransactionApp")
+      .where('idChauffeur', isEqualTo: iduser)
+      .where("etatTransaction", whereIn: [0, 1])
+      .snapshots()
+      .map((event) {
+        return event.docs
+            .map((e) => TransactionApp.fromJson(e.data()))
+            .toList();
+      });
+
+  static Stream<List<TransactionApp>> allTransaction(iduser) => firestore
+          .collection("TransactionApp")
+          .where('idChauffeur', isEqualTo: iduser)
+          .snapshots()
+          .map((event) {
+        return event.docs
+            .map((e) => TransactionApp.fromJson(e.data()))
+            .toList();
+      });
 // fin de la classe
 }
 

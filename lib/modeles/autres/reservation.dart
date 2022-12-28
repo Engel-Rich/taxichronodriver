@@ -75,15 +75,15 @@ class Reservation {
   }
 
 // anuller une réservation
-  annuletReservation() async {
+  Future annuletReservation() async {
     updateAcceptedState(-1);
-    await firestore.collection("TransactionApp").get().then((value) {
-      value.docs.map((tansaction) async {
-        final transaction = TransactionApp.fromJson(tansaction.data());
-        if (transaction.idReservation == idReservation) {
-          await transaction.modifierEtat(-1);
+    TransactionApp.allTransaction(authentication.currentUser!.uid)
+        .listen((event) async {
+      for (var element in event) {
+        if (element.idReservation == idReservation) {
+          await element.modifierEtat(-1);
         }
-      });
+      }
     });
   }
 
@@ -110,6 +110,13 @@ class Reservation {
         .set(reservation.tomap());
   }
 
+  //  la reservation en stream
+
+  static Stream<Reservation> reservationStream(idRserVation) => firestore
+      .collection("Reservation")
+      .doc(idRserVation)
+      .snapshots()
+      .map((event) => Reservation.fromJson(event.data()!));
   // fonction de réfus d'une reservation par un chaufeur.
   static Future<Map<String, bool>?> rejectByChauffeur(
       idchauffeur, Reservation reservation) async {

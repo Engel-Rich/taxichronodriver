@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import "package:flutter/material.dart";
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,8 +16,11 @@ import 'package:taxischronodriver/controllers/vehiculecontroller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/modeles/autres/reservation.dart';
+import 'package:taxischronodriver/modeles/autres/transaction.dart';
+import 'package:taxischronodriver/modeles/autres/vehicule.dart';
+import 'package:taxischronodriver/screens/component/infocard.dart';
+// import 'package:taxischronodriver/screens/etineraires.dart';
 
-import 'package:taxischronodriver/screens/etineraires.dart';
 import 'package:taxischronodriver/screens/sidebar.dart';
 import 'package:taxischronodriver/services/mapservice.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
@@ -39,17 +44,61 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool voirs = false;
   LatLng? location;
+  Set<Marker> markersSets = {};
 
+  setMrkers() {
+    markersSets.add(
+      Marker(
+        markerId: MarkerId(authentication.currentUser!.uid),
+        position: location!,
+        infoWindow: const InfoWindow(
+          title: "Votre Positions actuelle",
+        ),
+        icon: BitmapDescriptor.defaultMarker,
+      ),
+    );
+  }
+
+  // Location? userCurrentLocation;
   fromCurrentPosition() async {
-    await GooGleMapServices.requestLocation().then((value) {
-      setState(() {
-        location = GooGleMapServices.currentPosition;
+    var permissison = await GooGleMapServices.handleLocationPermission();
+    if (permissison) {
+      await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high)
+          .then((value) {
+        setState(() {
+          location = LatLng(value.latitude, value.longitude);
+          setMrkers();
+          print(location!.latitude);
+        });
       });
-      debugPrint('current positions');
+    }
+
+    Geolocator.getPositionStream().listen((event) async {
+      location = LatLng(event.latitude, event.longitude);
+      await Vehicule.setPosition(location!, authentication.currentUser!.uid);
+      setMrkers();
+      setState(() {});
     });
   }
 
+  voirMaPosition() async {
+    GoogleMapController googleMapController = await controllerMap.future;
+    googleMapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: location!,
+          zoom: 16,
+        ),
+      ),
+    );
+  }
+
+  PolylinePoints polylinePoints = PolylinePoints();
+  Map<PolylineId, Polyline> polylinesSets = {};
+
   var valueconut = 10;
+
   ///////////////////
   ///les fonctions
   ///////////////.
@@ -58,6 +107,22 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     Get.put<ChauffeurController>(ChauffeurController());
     fromCurrentPosition();
+    // Timer.periodic(
+    //   Duration(seconds: 30),
+    //   (timer) {
+    //     setState(() {
+    //       markersSets.add(
+    //         const Marker(
+    //             markerId: MarkerId("yaounde"),
+    //             infoWindow: InfoWindow(title: "Yaounde"),
+    //             position: younde),
+    //       );
+    //       getPolilineLines(younde, location!, polylinePoints, polylinesSets);
+    //     });
+    //     timer.cancel();
+    //   },
+    // );
+    transactionEncour();
     super.initState();
   }
 
@@ -76,10 +141,56 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(20)),
-                body: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: location ?? younde, zoom: 14),
-                ),
+                body: location == null
+                    ? Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Recherche de position...",
+                                    style: police,
+                                  ),
+                                ),
+                              ),
+                              spacerHeight(20),
+                              const LoadingComponen(),
+                              spacerHeight(10),
+                              Text(
+                                "Vérification des services de localisation ...",
+                                textAlign: TextAlign.center,
+                                style: police.copyWith(
+                                    letterSpacing: 3, fontSize: 16),
+                              ),
+                              spacerHeight(20),
+                              boutonText(
+                                  context: context,
+                                  action: () {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const HomePage()),
+                                        (route) => false);
+                                  },
+                                  text: 'Recharger'),
+                            ],
+                          ),
+                        ),
+                      )
+                    : GoogleMap(
+                        myLocationEnabled: true,
+                        initialCameraPosition:
+                            CameraPosition(target: location!, zoom: 14),
+                        onMapCreated: (control) {
+                          controllerMap.complete(control);
+                        },
+                        markers: markersSets,
+                        polylines: Set<Polyline>.of(polylinesSets.values),
+                      ),
                 panelBuilder: (controller) {
                   return SafeArea(
                     child: ListView(
@@ -99,11 +210,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                         boutonText(
                             context: context,
-                            text: 'Course en cours',
+                            text: 'Voir ma position',
                             action: () {
-                              Navigator.of(context).push(PageTransition(
-                                  child: const SearchDestinaitionPage(),
-                                  type: PageTransitionType.bottomToTop));
+                              voirMaPosition();
+                              // Navigator.of(context).push(PageTransition(
+                              //     child: const SearchDestinaitionPage(),
+                              //     type: PageTransitionType.bottomToTop));
                             })
                       ],
                     ),
@@ -162,7 +274,54 @@ class _HomePageState extends State<HomePage> {
                           switchBorder: Border.all(color: dredColor),
                           value: _.currentCar.statut,
                           onToggle: (value) async {
-                            await _.currentCar.setStatut(value);
+                            print(value);
+                            if (value == false) {
+                              await _.currentCar.setStatut(value);
+                            } else {
+                              if (_.currentCar.isActive) {
+                                await _.currentCar.setStatut(value);
+                              } else {
+                                boobtomshet(
+                                  keys: scaffoldKey,
+                                  hei: 300,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      spacerHeight(20),
+                                      Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Text(
+                                          "$value Votre Compte n'est plus actif veillez le réactiver pour continuer à recevoir les commandes des clients",
+                                          style: police.copyWith(
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                      spacerHeight(30),
+                                      boutonText(
+                                        couleur: Colors.green.shade400,
+                                        context: context,
+                                        action: () {
+                                          activerMoncompte();
+                                        },
+                                        text: "Activer mon compte",
+                                      ),
+                                      spacerHeight(15),
+                                      boutonText(
+                                        context: context,
+                                        action: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        text: "Annuler",
+                                      ),
+                                      spacerHeight(30),
+                                    ],
+                                  ),
+                                );
+                              }
+                            }
+
                             setState(() {});
                           },
                         );
@@ -185,11 +344,22 @@ class _HomePageState extends State<HomePage> {
                   builder: (control) {
                     if (control.reservations != null &&
                         control.reservations.isNotEmpty) {
-                      Chauffeur.havehicule(authentication.currentUser!.uid)
-                          .then((val) async {
-                        if (val != null) await val.setStatut(false);
+                      // setState(() {
+                      //   getPolilineLines(
+                      //       control.reservations[0].pointDepart.adresseposition,
+                      //       control.reservations[0].pointArrive.adresseposition,
+                      //       polylinePoints,
+                      //       polylinesSets);
+                      // });
+                      // Chauffeur.havehicule(authentication.currentUser!.uid)
+                      //     .then((val) async {
+                      //   if (val != null) await val.setStatut(false);
+                      // });
+                      Timer.periodic(const Duration(seconds: 9), (timer) {
+                        setState(() {
+                          polylinesSets = {};
+                        });
                       });
-
                       return RequestCard(
                         reservation: control.reservations[0],
                       );
@@ -203,15 +373,191 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+// fontionc activant le compte
+
+  activerMoncompte() async {
+    Navigator.of(context).pop();
+
+    boobtomshet(
+      keys: scaffoldKey,
+      hei: 500,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text('Choisissez votre plan de souscription',
+                textAlign: TextAlign.center,
+                style: police.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4)),
+          ),
+          spacerHeight(30),
+          ListTile(
+            onTap: () {},
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: dredColor,
+                )),
+            title: Text(
+              "2500 FCFA",
+              style: police.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            subtitle: Text("Valide 8 jours", style: police),
+            leading: CircleAvatar(
+              backgroundColor: dredColor,
+              child: Icon(Icons.local_taxi, color: blanc),
+            ),
+          ),
+          spacerHeight(7.5),
+          const Divider(),
+          spacerHeight(7.5),
+          ListTile(
+            onTap: () {
+              print(5000);
+            },
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Colors.blue.shade400,
+                )),
+            title: Text(
+              "5OOO FCFA",
+              style: police.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            subtitle: Text("Valide 16 jours", style: police),
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue.shade400,
+              child: Icon(Icons.local_taxi, color: blanc),
+            ),
+          ),
+          spacerHeight(7.5),
+          const Divider(),
+          spacerHeight(7.5),
+          ListTile(
+            onTap: () {
+              print(10000);
+            },
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Colors.green.shade400,
+                )),
+            title: Text(
+              "10 000 FCFA",
+              style: police.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            subtitle: Text("Valide 16 jours", style: police),
+            leading: CircleAvatar(
+              backgroundColor: Colors.green.shade400,
+              child: Icon(Icons.local_taxi, color: blanc),
+            ),
+          ),
+          spacerHeight(7.5),
+          const Divider(),
+          spacerHeight(7.5),
+          boutonText(
+              context: context,
+              action: () {
+                Navigator.of(context).pop();
+              },
+              text: 'Annuler'),
+          spacerHeight(30),
+        ],
+      ),
+    );
+  }
+
+// pour les transactions en cours
+
+  transactionEncour() async {
+    TransactionApp.currentTransaction(authentication.currentUser!.uid)
+        .listen((event) {
+      for (var elemnt in event) {
+        // print(elemnt.tomap());
+        if (elemnt.etatTransaction != 2 && elemnt.etatTransaction != -1) {
+          Reservation.reservationStream(elemnt.idReservation).listen((event) {
+            setState(() {
+              markersSets.add(
+                Marker(
+                  markerId: MarkerId(event.idClient),
+                  infoWindow: InfoWindow(
+                    title: elemnt.etatTransaction == 0
+                        ? event.pointDepart.adresseName
+                        : event.pointArrive.adresseName,
+                  ),
+                  position: elemnt.etatTransaction == 0
+                      ? event.pointDepart.adresseposition
+                      : event.pointArrive.adresseposition,
+                  onTap: () {
+                    scaffoldKey.currentState!.showBottomSheet((context) {
+                      return Container(
+                        height: 500,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20)),
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              InfosCard(reservation: event),
+                              spacerHeight(15),
+                              boutonText(
+                                context: context,
+                                action: () {
+                                  Navigator.of(context).pop();
+                                },
+                                text: "Okey",
+                              ),
+                              spacerHeight(15),
+                              boutonText(
+                                context: context,
+                                action: () async {
+                                  await event
+                                      .annuletReservation()
+                                      .then((value) {
+                                    Navigator.pop(context);
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        PageTransition(
+                                            child: const HomePage(),
+                                            type:
+                                                PageTransitionType.leftToRight),
+                                        (route) => false);
+                                  });
+                                },
+                                text: "Annuler la course",
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+                  },
+                ),
+              );
+            });
+          });
+        }
+      }
+    });
+  }
 }
 
 class RequestCard extends StatefulWidget {
   const RequestCard({
     Key? key,
     required this.reservation,
+    this.isView,
   }) : super(key: key);
 
   final Reservation reservation;
+  final bool? isView;
 
   @override
   State<RequestCard> createState() => _RequestCardState();
@@ -227,13 +573,16 @@ class _RequestCardState extends State<RequestCard> {
         });
       } else {
         timer.cancel();
+        Reservation.rejectByChauffeur(
+            authentication.currentUser!.uid, widget.reservation);
       }
     });
   }
 
+//
   @override
   void initState() {
-    conterSet();
+    if (widget.isView == null) conterSet();
     super.initState();
   }
 
@@ -244,7 +593,7 @@ class _RequestCardState extends State<RequestCard> {
     final arrive = widget.reservation.pointArrive;
     final type = widget.reservation.typeReservation;
     return SizedBox(
-      height: 410,
+      height: widget.isView == null ? 450 : 320,
       width: taille(context).width - 20,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -352,38 +701,31 @@ class _RequestCardState extends State<RequestCard> {
                 ),
                 subtitle: Text(
                   depart.adresseName,
+                  maxLines: 2,
                   style: police.copyWith(
                       fontSize: 16,
+                      overflow: TextOverflow.ellipsis,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                       letterSpacing: 0.0),
                 ),
               ),
-              Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Text(
-                    "Il vous reste : $valueconut s",
-                    style: police.copyWith(
-                        color: valueconut > 5 ? Colors.black : dredColor,
-                        fontSize: 14,
-                        letterSpacing: 3,
-                        fontWeight: FontWeight.bold),
-                  )
-                  //  LinearPercentIndicator(
-                  //   percent: 7 / valueconut,
-                  //   animationDuration: 1000,
-                  //   center: Text(
-                  //     "$valueconut s",
-                  //     style: police.copyWith(
-                  //         fontSize: 10,
-                  //         fontWeight: FontWeight.bold),
-                  //   ),
-                  //   lineHeight: 15,
-                  //   backgroundColor: Colors.grey.shade400,
-                  //   progressColor: dredColor,
-                  // ),
-                  ),
+              widget.isView == null
+                  ? ListTile(
+                      leading: Icon(
+                        Icons.watch_later_outlined,
+                        color: Colors.red.shade200,
+                      ),
+                      title: Text(
+                        "Il vous reste : $valueconut s",
+                        style: police.copyWith(
+                            color: valueconut > 5 ? Colors.black : dredColor,
+                            fontSize: 13,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  : const SizedBox(),
               ListTile(
                 leading:
                     Icon(Icons.location_history, color: dredColor, size: 30),
@@ -404,47 +746,49 @@ class _RequestCardState extends State<RequestCard> {
                 ),
               ),
               spacerHeight(15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton.icon(
-                      icon: const Icon(Icons.close, size: 30.0),
+              if (widget.isView == null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton.icon(
+                        icon: const Icon(Icons.close, size: 30.0),
+                        onPressed: () async {
+                          await Chauffeur.refuserserunCommande(
+                              widget.reservation,
+                              authentication.currentUser!.uid);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: dredColor,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9),
+                            )),
+                        label: Text('Annuler', style: police)),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.check, size: 30.0),
                       onPressed: () async {
-                        await Chauffeur.refuserserunCommande(widget.reservation,
-                            authentication.currentUser!.uid);
+                        Chauffeur.accepterLaCommande(widget.reservation,
+                                authentication.currentUser!.uid)
+                            .then((value) async {
+                          await Chauffeur.havehicule(
+                                  authentication.currentUser!.uid)
+                              .then((value) async {
+                            if (value != null) await value.setStatut(true);
+                          });
+                        });
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: dredColor,
+                          backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 9),
+                              horizontal: 25, vertical: 9),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(9),
                           )),
-                      label: Text('Annuler', style: police)),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.check, size: 30.0),
-                    onPressed: () async {
-                      Chauffeur.accepterLaCommande(widget.reservation,
-                              authentication.currentUser!.uid)
-                          .then((value) async {
-                        await Chauffeur.havehicule(
-                                authentication.currentUser!.uid)
-                            .then((value) async {
-                          if (value != null) await value.setStatut(true);
-                        });
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 25, vertical: 9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(9),
-                        )),
-                    label: Text('Accepter', style: police),
-                  )
-                ],
-              )
+                      label: Text('Accepter', style: police),
+                    )
+                  ],
+                )
             ],
           ),
         ),

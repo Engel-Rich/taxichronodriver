@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
@@ -23,26 +25,54 @@ class TransitionChauffeurVehicule extends StatefulWidget {
 
 class _TransitionChauffeurVehiculeState
     extends State<TransitionChauffeurVehicule> {
-  bool haveVehicule = false;
+  bool? haveVehicule;
   bool isEmailVerified = authentication.currentUser!.emailVerified;
   haveCar() async {
-    await Chauffeur.havehicule(authentication.currentUser!.uid).then((value) {
-      if (value != null) {
-        print(value.toMap());
-        setState(() => haveVehicule = true);
+    setState(() {
+      loafinTimerend = false;
+    });
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      count++;
+      print(count);
+      if (count == 30) {
+        setState(() {
+          loafinTimerend = true;
+        });
+        timer.cancel();
       }
-      {
-        print('don\'t have car');
+      try {
+        await Chauffeur.havehicule(authentication.currentUser!.uid)
+            .then((value) async {
+          if (value != null) {
+            // print(value.toMap());
+            // print(value.activeEndDate);
+            setState(() => haveVehicule = true);
+            setState(() {
+              loafinTimerend = false;
+            });
+            if (value.activeEndDate.compareTo(DateTime.now()) > 0) {
+              await value.setActiveState(false);
+            }
+          }
+          {
+            debugPrint('don\'t have car');
+          }
+        });
+      } catch (excep) {
+        debugPrint("Error");
       }
     });
   }
 
+  var loafinTimerend = false;
+  var count = 0;
   Timer? timer;
   @override
   void initState() {
     haveCar();
     Get.put<VehiculeController>(VehiculeController());
     Get.put<ChauffeurController>(ChauffeurController());
+
     GooGleMapServices.requestLocation();
 
     super.initState();
@@ -56,7 +86,39 @@ class _TransitionChauffeurVehiculeState
 
   @override
   Widget build(BuildContext context) {
-    return haveVehicule ? const HomePage() : const RequestCar();
+    if (haveVehicule == null) {
+      return Scaffold(
+        body: !loafinTimerend
+            ? const LoadingComponen()
+            : Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text(
+                          "Erreur de connexion internet ...",
+                          style: police,
+                        ),
+                      ),
+                    ),
+                    spacerHeight(50),
+                    boutonText(
+                        context: context,
+                        action: () {
+                          haveCar();
+                        },
+                        text: 'Rechergé')
+                  ],
+                ),
+              ),
+      );
+    } else {
+      return haveVehicule == true ? const HomePage() : const RequestCar();
+    }
   }
 
   sendVerificationEmail() async {

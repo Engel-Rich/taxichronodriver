@@ -16,7 +16,6 @@ import 'package:taxischronodriver/varibles/variables.dart';
 class Chauffeur extends ApplicationUser {
   final String? numeroPermi;
   final DateTime? expirePermiDate;
-  bool active;
   String? passeword;
   Chauffeur({
     required super.userAdresse,
@@ -24,7 +23,6 @@ class Chauffeur extends ApplicationUser {
     required super.userName,
     required super.userTelephone,
     required super.userCni,
-    required this.active,
     super.motDePasse,
     super.userDescription,
     super.userid,
@@ -47,7 +45,6 @@ class Chauffeur extends ApplicationUser {
         if (numeroPermi != null) "numeroPermi": numeroPermi,
         if (expirePermiDate != null)
           'expirePermiDate': Timestamp.fromDate(expirePermiDate!),
-        'active': active,
       };
 
   // function de validation OTP
@@ -122,7 +119,6 @@ class Chauffeur extends ApplicationUser {
         userProfile: userMap['userProfile'],
         userid: userMap['userid'],
         expireCniDate: (userMap['ExpireCniDate'] as Timestamp).toDate(),
-        active: chauffeurMap['active'],
         numeroPermi: chauffeurMap['numeroPermi'],
         expirePermiDate:
             (chauffeurMap['expirePermiDate'] as Timestamp).toDate(),
@@ -130,18 +126,17 @@ class Chauffeur extends ApplicationUser {
   // la fonction d'acceptation de la commande
 
   static Future accepterLaCommande(Reservation reservation, chauffid) async {
-    await Reservation.acceptByChauffeur(chauffid, reservation).then((value) {
-      if (value != null && value['accept'] == true) {
-        TransactionApp transaction = TransactionApp(
-          idTansaction: DateTime.now().millisecondsSinceEpoch.toString(),
-          idclient: reservation.idClient,
-          dateAcceptation: DateTime.now(),
-          idChauffer: chauffid!,
-          idReservation: reservation.idReservation,
-          etatTransaction: 0,
-        );
-        transaction.valideTransaction();
-      }
+    await Reservation.acceptByChauffeur(chauffid, reservation)
+        .then((value) async {
+      TransactionApp transaction = TransactionApp(
+        idTansaction: DateTime.now().millisecondsSinceEpoch.toString(),
+        idclient: reservation.idClient,
+        dateAcceptation: DateTime.now(),
+        idChauffer: chauffid!,
+        idReservation: reservation.idReservation,
+        etatTransaction: 0,
+      );
+      await transaction.valideTransaction();
     });
   }
 
@@ -168,6 +163,8 @@ class Chauffeur extends ApplicationUser {
   static Future setStatut(String userId, bool statut) async {
     await chauffeurCollection(userId).set({"statut": statut});
   }
+
+  // fonction vérifiant si le chauffeur est actif
 
   // @override
   Future loginChauffeur(String password) async {

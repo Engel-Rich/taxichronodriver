@@ -8,6 +8,8 @@ import '../modeles/autres/vehicule.dart';
 class VehiculeController extends GetxController {
   Rx<Vehicule> currentVehicul = Vehicule(
     assurance: "",
+    isActive: false,
+    activeEndDate: DateTime.now(),
     expirationAssurance: DateTime.now(),
     imatriculation: "",
     numeroDeChassie: "",

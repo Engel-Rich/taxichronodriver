@@ -12,7 +12,6 @@ class ChauffeurController extends GetxController {
           userName: '',
           userTelephone: '',
           userCni: "",
-          active: false,
           expireCniDate: DateTime.now(),
           numeroPermi: '',
           expirePermiDate: DateTime.now())
