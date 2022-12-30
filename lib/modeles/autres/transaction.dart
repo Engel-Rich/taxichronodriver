@@ -129,6 +129,8 @@ class TransactionApp {
           .map((event) {
         return event.docs
             .map((e) => TransactionApp.fromJson(e.data()))
+            .toList()
+            .reversed
             .toList();
       });
 // fin de la classe

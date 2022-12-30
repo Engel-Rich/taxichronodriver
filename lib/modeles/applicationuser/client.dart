@@ -58,8 +58,6 @@ class Client extends ApplicationUser {
           packages.prixPackage * codePromo.pourcentageDeReduction;
     }
 
-    // TODO implementation du payement;
-
     ForfetClients forfetsActifs = ForfetClients(
       idUser: userid!,
       activationDate: DateTime.now(),

@@ -10,6 +10,7 @@ class Vehicule {
   DateTime expirationAssurance;
   bool isActive;
   DateTime activeEndDate;
+  String token;
 
   String chauffeurId;
   bool
@@ -19,6 +20,7 @@ class Vehicule {
   Vehicule({
     required this.assurance,
     required this.expirationAssurance,
+    required this.token,
     required this.imatriculation,
     required this.numeroDeChassie,
     required this.isActive,
@@ -35,6 +37,7 @@ class Vehicule {
         "numeroDeChassie": numeroDeChassie,
         "isActive": isActive,
         "activeEndDate": activeEndDate.millisecondsSinceEpoch,
+        "token": token,
         if (position != null)
           "position": {
             "latitude": position!.latitude,
@@ -53,6 +56,7 @@ class Vehicule {
             DateTime.fromMicrosecondsSinceEpoch(map['expirationAssurance']),
         imatriculation: map['imatriculation'],
         numeroDeChassie: map["numeroDeChassie"],
+        token: map['token'] ?? "",
         position:
             LatLng(map['position']['latitude'], map['position']['longitude']),
         statut: map['statut'],
@@ -60,7 +64,7 @@ class Vehicule {
 
 // demande d'enrégistrement du véhicule
   Future requestSave() async {
-    print(toMap());
+    // print(toMap());
     await datatbase
         .ref("Vehicules")
         .child(chauffeurId)
@@ -103,10 +107,11 @@ class Vehicule {
     });
   }
 
-  setActiveState(bool etatActuel) async {
-    await datatbase.ref("Vehicules").child(chauffeurId).update({
-      "isActive": etatActuel,
-    });
+  setActiveState(bool etatActuel, jours) async {
+    await datatbase
+        .ref("Vehicules")
+        .child(chauffeurId)
+        .update({"isActive": etatActuel, "activeEndDate": jours});
   }
 
   static Stream<Vehicule> vehiculeStrem(idchau) =>

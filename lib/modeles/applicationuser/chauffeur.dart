@@ -189,12 +189,12 @@ class Chauffeur extends ApplicationUser {
         .doc(idChauffeur)
         .get()
         .then((user) {
-      print('Users datas ${user.data()}');
+      // print('Users datas ${user.data()}');
       return user.data()!;
     });
     final chauffeurMap =
         await chauffeurCollection(idChauffeur).get().then((event) {
-      print('Chauffeurs datas datas ${event.data()}');
+      // print('Chauffeurs datas datas ${event.data()}');
       return event.data()!;
     });
     return Chauffeur.fromMap(userMap: userMap, chauffeurMap: chauffeurMap);

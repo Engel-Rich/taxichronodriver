@@ -16,7 +16,7 @@ class _MesRequettesState extends State<MesRequettes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Vous requettes",
+        title: Text("Vos Courses",
             style: police.copyWith(fontWeight: FontWeight.bold)),
         backgroundColor: dredColor,
       ),

@@ -1,11 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:taxischronodriver/screens/login_page.dart';
+import 'package:taxischronodriver/screens/auth/login_page.dart';
+import 'package:taxischronodriver/screens/component/codepromo.dart';
+// import 'package:taxischronodriver/screens/homepage.dart';
 import 'package:taxischronodriver/screens/mesrequettes.dart';
 // import 'package:taxischronodriver/screens/paquage.dart';
-import 'package:taxischronodriver/screens/profilepage.dart';
+import 'package:taxischronodriver/screens/auth/profilepage.dart';
 import 'package:taxischronodriver/services/firebaseauthservice.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -124,15 +128,19 @@ class _SideBarState extends State<SideBar> {
               leading: const Icon(Icons.description),
               title: Text('A propos de Taxis chrono', style: police),
               onTap: () async {
-                launchUrl(Uri.parse("http://www.taxi-chrono.net"));
+                launchUrl(Uri.parse("https://www.taxi-chrono.net"));
               }),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.share),
-            title: Text('Partager l\'appli', style: police),
-            // ignore: avoid_returning_null_for_void
-            onTap: () => null,
-          ),
+              leading: const Icon(Icons.bookmark_border),
+              title: Text('Utiliser un code Promo', style: police),
+              // ignore: avoid_returning_null_for_void
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(PageTransition(
+                    child: const CodePromocomponent(),
+                    type: PageTransitionType.leftToRight));
+              }),
           isConnected
               ? ListTile(
                   title: Text('Déconexion', style: police),
@@ -140,7 +148,7 @@ class _SideBarState extends State<SideBar> {
                   // ignore: avoid_returning_null_for_void
                   onTap: () async => isConnected
                       ? Authservices().logOut().then((value) {
-                          print("deconnexion");
+                          // print("deconnexion");
                           Navigator.of(context).pop();
                           setState(() {});
                         })

@@ -5,7 +5,7 @@ import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 
-import '../varibles/variables.dart';
+import '../../varibles/variables.dart';
 
 class OtpPage extends StatefulWidget {
   final Chauffeur? chauffeur;
@@ -108,6 +108,7 @@ class _OtpPageState extends State<OtpPage> {
                         context: context,
                         action: () {
                           if (smsCode.length == 6) {
+                            showload(context);
                             if (widget.isauthentication) {
                               ApplicationUser.validateOPT(context,
                                   smsCode: smsCode,

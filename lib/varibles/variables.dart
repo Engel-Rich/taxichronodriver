@@ -225,3 +225,20 @@ class LoadingComponen extends StatelessWidget {
     );
   }
 }
+
+final header = {
+  "Accept": "application/json",
+  "Authorization": publickeyPaiment,
+};
+
+const publickeyPaiment = "b.W0h22esh35vut5Ov";
+const pathUrl = "https://api.notchpay.co/payments/initialize";
+showload(context) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return const SimpleDialog(children: [
+          LoadingComponen(),
+        ]);
+      });
+}

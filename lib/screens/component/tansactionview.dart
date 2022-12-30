@@ -65,7 +65,7 @@ class _TransactionViewState extends State<TransactionView> {
                       ),
                     )
                   : const Center(
-                      child: CircularProgressIndicator(),
+                      child: LoadingComponen(),
                     );
         });
     ;

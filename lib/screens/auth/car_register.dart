@@ -22,7 +22,7 @@ class _RequestCarState extends State<RequestCar> {
   TextEditingController controllermodele = TextEditingController();
   TextEditingController controllerCouleur = TextEditingController();
   final formkey = GlobalKey<FormState>();
-
+  bool loder = false;
   //  le debu du corps
   @override
   Widget build(BuildContext context) {
@@ -41,106 +41,115 @@ class _RequestCarState extends State<RequestCar> {
         //   },
         // ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  vertical: 40,
-                ),
+      body: loder
+          ? const LoadingComponen()
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DelayedAnimation(
-                      delay: 1500,
-                      child: Text(
-                        "Formulaire d'enregistrement du véhicule",
-                        style: GoogleFonts.poppins(
-                          color: dredColor,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w600,
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 40,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DelayedAnimation(
+                            delay: 1500,
+                            child: Text(
+                              "Formulaire d'enregistrement du véhicule",
+                              style: GoogleFonts.poppins(
+                                color: dredColor,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          DelayedAnimation(
+                            delay: 2500,
+                            child: Text(
+                              "Pensez à bien verifier les informations saisis afin de faciliter la validation de votre vehicule.",
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 35),
+                    signupForm(),
+                    const SizedBox(height: 35),
+                    SizedBox(
+                      width: double.infinity,
+                      child: DelayedAnimation(
+                        delay: 5500,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              elevation: 1,
+                              shape: const StadiumBorder(),
+                              backgroundColor: dredColor,
+                              padding: const EdgeInsets.symmetric(
+                                // horizontal: 125,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: Text(
+                              'ENREGISTRER',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 4),
+                            ),
+                            onPressed: () async =>
+                                await valideRequest(loder).then(
+                              (value) => Navigator.of(context).pushReplacement(
+                                PageTransition(
+                                    child: const HomePage(),
+                                    type: PageTransitionType.leftToRight),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 22),
-                    DelayedAnimation(
-                      delay: 2500,
-                      child: Text(
-                        "Pensez à bien verifier les informations saisis afin de faciliter la validation de votre vehicule.",
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    spacerHeight(15),
                   ],
                 ),
               ),
-              const SizedBox(height: 35),
-              signupForm(),
-              const SizedBox(height: 35),
-              SizedBox(
-                width: double.infinity,
-                child: DelayedAnimation(
-                  delay: 5500,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 1,
-                        shape: const StadiumBorder(),
-                        backgroundColor: dredColor,
-                        padding: const EdgeInsets.symmetric(
-                          // horizontal: 125,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: Text(
-                        'ENREGISTRER',
-                        style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 4),
-                      ),
-                      onPressed: () async => await valideRequest().then(
-                        (value) => Navigator.of(context).pushReplacement(
-                          PageTransition(
-                              child: const HomePage(),
-                              type: PageTransitionType.leftToRight),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              spacerHeight(15),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
-  Future valideRequest() async {
+  Future valideRequest(bool loader) async {
     if (formkey.currentState!.validate()) {
+      setState(() {
+        loader = true;
+      });
       Vehicule vehicule = Vehicule(
-        assurance: controllerassurance.text,
-        expirationAssurance: expireassurance!,
-        isActive: false,
-        activeEndDate: DateTime.now(),
-        imatriculation: controllerimat.text,
-        numeroDeChassie: controllerChassie.text,
-        chauffeurId: authentication.currentUser!.uid,
-        statut: false,
-        position: GooGleMapServices.currentPosition,
-      );
+          assurance: controllerassurance.text,
+          expirationAssurance: expireassurance!,
+          isActive: false,
+          activeEndDate: DateTime.now(),
+          imatriculation: controllerimat.text,
+          numeroDeChassie: controllerChassie.text,
+          chauffeurId: authentication.currentUser!.uid,
+          statut: false,
+          position: GooGleMapServices.currentPosition,
+          token: " ");
       await vehicule.requestSave().then((value) {
-        print(value);
+        // print(value);
         if (value == true) {
+          setState(() {
+            loader = false;
+          });
           Navigator.of(context).pushReplacement(
             PageTransition(
               child: const HomePage(),
@@ -148,6 +157,9 @@ class _RequestCarState extends State<RequestCar> {
             ),
           );
         } else if (value == "véhicule déja existant ce véhicule existe déjà") {
+          setState(() {
+            loader = false;
+          });
           getsnac(title: "Erreur d'enrégistrement ", msg: "$value");
         }
       });

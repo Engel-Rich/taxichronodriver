@@ -6,8 +6,8 @@ import 'package:page_transition/page_transition.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
-import 'package:taxischronodriver/screens/login_number.dart';
-import 'package:taxischronodriver/screens/otppage.dart';
+import 'package:taxischronodriver/screens/auth/login_number.dart';
+import 'package:taxischronodriver/screens/auth/otppage.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 class SignupPage extends StatefulWidget {
@@ -47,6 +47,9 @@ class _SignupPageState extends State<SignupPage> {
               userPhonNumber: numberSubmited!.phoneNumber)
           .then((value) async {
         if (value) {
+          setState(() {
+            loader = false;
+          });
           FocusScope.of(keyscafold.currentContext!).unfocus();
           keyscafold.currentState!.showBottomSheet((context) {
             return Container(
@@ -83,6 +86,9 @@ class _SignupPageState extends State<SignupPage> {
                     boutonText(
                         context: context,
                         action: () {
+                          setState(() {
+                            loader = false;
+                          });
                           Navigator.of(context).pop();
                         },
                         text: "Annuler")
@@ -148,7 +154,9 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
-  bool loading = false;
+  // loading
+
+  bool loader = false;
   bool isEmail(String value) {
     return RegExp(
             r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
@@ -158,18 +166,11 @@ class _SignupPageState extends State<SignupPage> {
   //  le debu du corps
   @override
   Widget build(BuildContext context) {
-    return loading
-        ? Container(
-            color: blanc,
-            width: double.infinity,
-            height: double.infinity,
-            child: Center(
-              child: CircularProgressIndicator(backgroundColor: dredColor),
-            ),
-          )
-        : Scaffold(
-            key: keyscafold,
-            body: SafeArea(
+    return Scaffold(
+      key: keyscafold,
+      body: loader
+          ? const LoadingComponen()
+          : SafeArea(
               child: SingleChildScrollView(
                 // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Padding(
@@ -237,13 +238,8 @@ class _SignupPageState extends State<SignupPage> {
                                       letterSpacing: 4),
                                 ),
                                 onPressed: () {
-                                  setState(() {
-                                    loading = true;
-                                  });
+                                  showload(context);
                                   chauffeurRegister();
-                                  setState(() {
-                                    loading = false;
-                                  });
                                   setState(() {});
                                 }),
                           ),
@@ -306,7 +302,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
             ),
-          );
+    );
   }
 
   Widget signupForm() {

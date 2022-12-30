@@ -88,7 +88,7 @@ class GooGleMapServices {
     await http.get(Uri.parse(url)).then((value) {
       if (value.statusCode == 200) {
         final res = jsonDecode(value.body);
-        print(res);
+        // print(res);
         if (res['status'] == 'OK') {
           final predictions = res['predictions'];
 

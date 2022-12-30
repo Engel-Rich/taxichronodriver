@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+// import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:page_transition/page_transition.dart';
+// import 'package:page_transition/page_transition.dart';
 import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
-import 'package:taxischronodriver/screens/car_register.dart';
+import 'package:taxischronodriver/screens/auth/car_register.dart';
 import 'package:taxischronodriver/screens/homepage.dart';
 import 'package:taxischronodriver/services/mapservice.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
@@ -33,7 +33,7 @@ class _TransitionChauffeurVehiculeState
     });
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       count++;
-      print(count);
+      // print(count);
       if (count == 30) {
         setState(() {
           loafinTimerend = true;
@@ -44,17 +44,19 @@ class _TransitionChauffeurVehiculeState
         await Chauffeur.havehicule(authentication.currentUser!.uid)
             .then((value) async {
           if (value != null) {
-            // print(value.toMap());
-            // print(value.activeEndDate);
             setState(() => haveVehicule = true);
             setState(() {
               loafinTimerend = false;
             });
             if (value.activeEndDate.compareTo(DateTime.now()) > 0) {
-              await value.setActiveState(false);
+              await value.setActiveState(false, value.activeEndDate);
             }
           }
           {
+            setState(() {
+              haveVehicule = false;
+            });
+            timer.cancel();
             debugPrint('don\'t have car');
           }
         });

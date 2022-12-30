@@ -124,8 +124,8 @@ class Authservices extends ChangeNotifier {
 // flutter Login
   Future logOut() async {
     try {
-      await googleSignIn.disconnect();
       await authentication.signOut();
+      await googleSignIn.disconnect();
     } on FirebaseAuthException catch (e) {
       debugPrint(e.code);
     }

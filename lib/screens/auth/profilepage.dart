@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:taxischronodriver/modeles/autres/transaction.dart';
 
-import '../varibles/variables.dart';
+import '../../varibles/variables.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -149,8 +149,7 @@ class ProfileScreen extends StatelessWidget {
                                                   } else {
                                                     // print(snapshot.error);
                                                     return const Center(
-                                                      child:
-                                                          CircularProgressIndicator(),
+                                                      child: LoadingComponen(),
                                                     );
                                                   }
                                                 }),
@@ -262,57 +261,61 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        StreamBuilder<List<TransactionApp>>(
-                            stream: TransactionApp.allTransaction(
-                                authentication.currentUser!.uid),
-                            builder: (context, snapshot) {
-                              return !snapshot.hasError &&
-                                      snapshot.hasData &&
-                                      snapshot.data!.isNotEmpty
-                                  ? ListView.builder(
-                                      itemCount: snapshot.data!.length,
-                                      itemBuilder: (context, index) {
-                                        final data = snapshot.data!;
-                                        if (data[index]
-                                                    .commentaireClientSurLeChauffeur !=
-                                                null &&
-                                            data[index]
-                                                .commentaireClientSurLeChauffeur!
-                                                .trim()
-                                                .isNotEmpty) {
-                                          return Container(
-                                            padding: const EdgeInsets.all(12),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                topLeft: Radius.circular(30),
-                                                topRight: Radius.circular(30),
-                                                bottomLeft: Radius.circular(30),
+                        Expanded(
+                          child: StreamBuilder<List<TransactionApp>>(
+                              stream: TransactionApp.allTransaction(
+                                  authentication.currentUser!.uid),
+                              builder: (context, snapshot) {
+                                return !snapshot.hasError &&
+                                        snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty
+                                    ? ListView.builder(
+                                        itemCount: snapshot.data!.length,
+                                        itemBuilder: (context, index) {
+                                          final data = snapshot.data!;
+                                          if (data[index]
+                                                      .commentaireClientSurLeChauffeur !=
+                                                  null &&
+                                              data[index]
+                                                  .commentaireClientSurLeChauffeur!
+                                                  .trim()
+                                                  .isNotEmpty) {
+                                            return Container(
+                                              margin: const EdgeInsets.all(5),
+                                              padding: const EdgeInsets.all(18),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    const BorderRadius.only(
+                                                  topLeft: Radius.circular(30),
+                                                  topRight: Radius.circular(30),
+                                                  bottomLeft:
+                                                      Radius.circular(30),
+                                                ),
+                                                color: Colors.blue.shade100,
                                               ),
-                                              color: Colors.blue.shade100,
-                                            ),
+                                              child: Center(
+                                                  child: Text(data[index]
+                                                      .commentaireClientSurLeChauffeur!)),
+                                            );
+                                          } else {
+                                            return const SizedBox.shrink();
+                                          }
+                                        })
+                                    : snapshot.hasData && snapshot.data!.isEmpty
+                                        ? const Padding(
+                                            padding: EdgeInsets.only(top: 100),
                                             child: Center(
-                                                child: Text(data[index]
-                                                    .commentaireClientSurLeChauffeur!)),
+                                                child: Icon(
+                                                    Icons.hourglass_empty)),
+                                          )
+                                        : const Padding(
+                                            padding: EdgeInsets.only(top: 100),
+                                            child: Center(
+                                              child: LoadingComponen(),
+                                            ),
                                           );
-                                        } else {
-                                          return const SizedBox.shrink();
-                                        }
-                                      })
-                                  : snapshot.hasData && snapshot.data!.isEmpty
-                                      ? const Padding(
-                                          padding: EdgeInsets.only(top: 100),
-                                          child: Center(
-                                              child:
-                                                  Icon(Icons.hourglass_empty)),
-                                        )
-                                      : const Padding(
-                                          padding: EdgeInsets.only(top: 100),
-                                          child: Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                            })
+                              }),
+                        )
                       ],
                     ),
                   ),

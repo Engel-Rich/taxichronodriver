@@ -125,6 +125,13 @@ class Reservation {
     return null;
   }
 
+  static Future<Reservation> reservationFuture(idRserVation) async =>
+      await firestore
+          .collection("Reservation")
+          .doc(idRserVation)
+          .get()
+          .then((event) => Reservation.fromJson(event.data()!));
+
   static Future<Map<String, bool>?> acceptByChauffeur(
       idchauffeur, Reservation reservation) async {
     await suprimeraRservationChezUnChaufeur(idchauffeur, reservation)

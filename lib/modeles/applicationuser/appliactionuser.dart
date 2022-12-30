@@ -6,7 +6,7 @@ import 'package:taxischronodriver/modeles/autres/reservation.dart';
 import 'package:taxischronodriver/modeles/autres/transaction.dart';
 import 'package:taxischronodriver/modeles/discutions/conversation.dart';
 import 'package:taxischronodriver/modeles/discutions/message.dart';
-import 'package:taxischronodriver/screens/register.dart';
+import 'package:taxischronodriver/screens/auth/register.dart';
 import 'package:taxischronodriver/services/firebaseauthservice.dart';
 import 'package:taxischronodriver/services/transitionchauffeur.dart';
 import 'package:taxischronodriver/varibles/variables.dart';

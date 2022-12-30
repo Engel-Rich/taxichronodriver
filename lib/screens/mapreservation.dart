@@ -10,7 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:taxischronodriver/screens/login_page.dart';
+import 'package:taxischronodriver/screens/auth/login_page.dart';
 
 import '../modeles/applicationuser/appliactionuser.dart';
 import '../modeles/autres/reservation.dart';
