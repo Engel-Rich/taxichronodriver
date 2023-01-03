@@ -112,6 +112,13 @@ class _LoginNumberState extends State<LoginNumber> {
                                 verificationFailed: (except) {
                                   loader = false;
                                   setState(() {});
+                                  debugPrint(except.code);
+
+                                  toaster(
+                                      message:
+                                          "Erreur d'enrégistrement Veillez réssayer",
+                                      color: Colors.red,
+                                      long: true);
                                 },
                                 global: globalkey,
                               );

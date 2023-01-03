@@ -211,7 +211,11 @@ class Chauffeur extends ApplicationUser {
     await datatbase.ref("Vehicules").child(userid).get().then((value) {
       if (value.exists) {
         // print(Vehicule.froJson(value.value).toMap());
-        result = Vehicule.froJson(value.value);
+        try {
+          result = Vehicule.froJson(value.value);
+        } catch (e) {
+          result = null;
+        }
       } else {
         result = null;
       }

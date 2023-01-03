@@ -617,7 +617,6 @@ class _HomePageState extends State<HomePage> {
                         final map = {
                           'currency': 'xaf',
                           'channel': 'mobile',
-                          "sandbox": "sb.LCpQWUn5EhUyl0AmvtkEEQhYzJ4e0B0n",
                           'data': {
                             'phone': '+237${controllerphone.text}',
                           },
@@ -631,10 +630,10 @@ class _HomePageState extends State<HomePage> {
                           )
                               .then((valuerequest) {
                             // print(valuerequest);
-                            toaster(
-                                message:
-                                    "Taper #150*50# et suivre les instructions",
-                                long: true);
+                            // toaster(
+                            //     message:
+                            //         "Taper #150*50# et suivre les instructions",
+                            //     long: true);
                             loder = false;
                             setState(() {});
                             dialogInformation(context,
@@ -649,7 +648,7 @@ class _HomePageState extends State<HomePage> {
                               Timer.periodic(const Duration(seconds: 1),
                                   (timer) async {
                                 counta++;
-                                if (counta == 120) {
+                                if (counta == 180) {
                                   timer.cancel();
                                 }
 
@@ -715,13 +714,13 @@ class _HomePageState extends State<HomePage> {
               );
             },
           );
-        } else {}
-      } else {
-        toaster(
-            message:
-                "Une Erreur est survenu: veillez vérifier votre connexion internet",
-            long: true);
-      }
+        } else {
+          toaster(
+              message:
+                  "Une Erreur est survenu: veillez vérifier votre connexion internet",
+              long: true);
+        }
+      } else {}
     });
   }
 

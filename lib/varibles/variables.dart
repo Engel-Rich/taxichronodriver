@@ -232,7 +232,7 @@ final header = {
   "Authorization": publickeyPaiment,
 };
 
-const publickeyPaiment = "b.W0h22esh35vut5Ov";
+const publickeyPaiment = "b.S3PM3xdiXFRIT8l6";
 const pathUrl = "https://api.notchpay.co/payments/initialize";
 showload(context) {
   showDialog(
