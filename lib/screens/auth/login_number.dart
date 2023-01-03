@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,7 +62,8 @@ class _LoginNumberState extends State<LoginNumber> {
                         hintText: "Votre Numéro de téléphone",
                         textStyle: police,
                         validator: (val) {
-                          return val == null || val.length < 13
+                          return numberSubmited == null ||
+                                  numberSubmited!.phoneNumber!.length < 13
                               ? "entrez un numéro de téléphone valide"
                               : null;
                         },
@@ -80,15 +82,14 @@ class _LoginNumberState extends State<LoginNumber> {
                       delay: 2000,
                       child: boutonText(
                           context: context,
-                          action: () {
+                          action: () async {
                             if (numberSubmited != null &&
                                 numberSubmited!.phoneNumber!.trim().length ==
                                     13) {
-                              setState(() {
-                                loader = true;
-                              });
-                              // print(numberSubmited!.phoneNumber);
-                              ApplicationUser.authenticatePhonNumber(
+                              loader = true;
+                              setState(() {});
+                              print(loader);
+                              await ApplicationUser.authenticatePhonNumber(
                                 phonNumber: numberSubmited!.phoneNumber!,
                                 onCodeSend: (verificationId, resendToken) {
                                   Navigator.of(context).push(PageTransition(
@@ -109,15 +110,20 @@ class _LoginNumberState extends State<LoginNumber> {
                                           auth.user!.uid);
                                 },
                                 verificationFailed: (except) {
-                                  setState(() {
-                                    loader = false;
-                                  });
+                                  loader = false;
+                                  setState(() {});
                                 },
                                 global: globalkey,
                               );
-                              setState(() {
-                                loader = false;
-                              });
+
+                              loader = false;
+                              setState(() {});
+                              print(loader);
+                            } else {
+                              toaster(
+                                  message:
+                                      "entrer une numéro de téléphone valide",
+                                  color: Colors.red);
                             }
                           },
                           text: "Valider"),

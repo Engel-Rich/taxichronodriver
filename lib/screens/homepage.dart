@@ -72,8 +72,11 @@ class _HomePageState extends State<HomePage> {
   // Location? userCurrentLocation;
   fromCurrentPosition() async {
     location = GooGleMapServices.currentPosition;
-    setMrkers();
-    setState(() {});
+    if (location != null) {
+      setMrkers();
+      setState(() {});
+    }
+
     if (location == null) {
       var permissison = await GooGleMapServices.handleLocationPermission();
       if (permissison) {
@@ -97,6 +100,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+// fonction permettanrt de revenir sur la position de l'Utilisateur
   voirMaPosition() async {
     GoogleMapController googleMapController = await controllerMap.future;
     googleMapController.animateCamera(
@@ -111,6 +115,7 @@ class _HomePageState extends State<HomePage> {
 
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylinesSets = {};
+  bool loder = false;
 
   ///////////////////
   ///les fonctions
@@ -175,51 +180,13 @@ class _HomePageState extends State<HomePage> {
                   GoogleMap(
                     myLocationEnabled: true,
                     initialCameraPosition:
-                        CameraPosition(target: location!, zoom: 14),
+                        CameraPosition(target: location!, zoom: 16),
                     onMapCreated: (control) {
                       controllerMap.complete(control);
                     },
                     markers: markersSets,
                     polylines: Set<Polyline>.of(polylinesSets.values),
                   ),
-
-                  // SlidingUpPanel(
-                  //     parallaxEnabled: true,
-                  //     minHeight: taille(context).height * 0.15,
-                  //     maxHeight: taille(context).height * 0.15,
-                  //     padding: const EdgeInsets.symmetric(horizontal: 25),
-                  //     borderRadius:
-                  //         const BorderRadius.vertical(top: Radius.circular(20)),
-                  //     // body:
-                  //     panelBuilder: (controller) {
-                  //       return SafeArea(
-                  //         child: ListView(
-                  //           controller: controller,
-                  //           children: [
-                  //             Center(
-                  //               child: SizedBox(
-                  //                 child: Container(
-                  //                   margin: const EdgeInsets.all(10),
-                  //                   height: 10,
-                  //                   width: 30,
-                  //                   decoration: BoxDecoration(
-                  //                       color: Colors.grey.shade400,
-                  //                       borderRadius: BorderRadius.circular(20)),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //             boutonText(
-                  //                 context: context,
-                  //                 text: 'Voir ma position',
-                  //                 action: () {
-                  //                   // testerLaNotification();
-                  //                   voirMaPosition();
-                  //                 })
-                  //           ],
-                  //         ),
-                  //       );
-                  //     }),
-
                   Positioned(
                     top: 10,
                     left: 0,
@@ -339,7 +306,6 @@ class _HomePageState extends State<HomePage> {
                           }),
                     ),
                   ),
-
                   Positioned(
                     bottom: 20,
                     left: 10,
@@ -409,7 +375,15 @@ class _HomePageState extends State<HomePage> {
                             );
                           }
                         }),
-                  )
+                  ),
+                  loder
+                      ? Container(
+                          height: double.infinity,
+                          width: double.infinity,
+                          color: noire.withOpacity(0.4),
+                          child: const Center(child: LoadingComponen()),
+                        )
+                      : const SizedBox.shrink()
                 ],
               ),
       ),
@@ -443,8 +417,8 @@ class _HomePageState extends State<HomePage> {
           ),
           spacerHeight(30),
           ListTile(
-            onTap: () {
-              payement(jours: 8, prix: 2500, scaffoldkey: scaffoldKey);
+            onTap: () async {
+              await payement(jours: 8, prix: 2500, scaffoldkey: scaffoldKey);
             },
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -465,8 +439,8 @@ class _HomePageState extends State<HomePage> {
           const Divider(),
           spacerHeight(7.5),
           ListTile(
-            onTap: () {
-              payement(jours: 16, prix: 5000, scaffoldkey: scaffoldKey);
+            onTap: () async {
+              await payement(jours: 16, prix: 5000, scaffoldkey: scaffoldKey);
             },
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -487,8 +461,8 @@ class _HomePageState extends State<HomePage> {
           const Divider(),
           spacerHeight(7.5),
           ListTile(
-            onTap: () {
-              payement(jours: 31, prix: 2500, scaffoldkey: scaffoldKey);
+            onTap: () async {
+              await payement(jours: 32, prix: 10000, scaffoldkey: scaffoldKey);
             },
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -499,7 +473,7 @@ class _HomePageState extends State<HomePage> {
               "10 000 FCFA",
               style: police.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            subtitle: Text("Valide 16 jours", style: police),
+            subtitle: Text("Valide 32 jours", style: police),
             leading: CircleAvatar(
               backgroundColor: Colors.green.shade400,
               child: Icon(Icons.local_taxi, color: blanc),
@@ -557,10 +531,7 @@ class _HomePageState extends State<HomePage> {
 // paiements
 ///////////////////////////////////////////////////////////:::
 
-  payement({
-    // required String phoneNumber,
-    // String? email,
-    // required String name,
+  Future payement({
     required double prix,
     required int jours,
     required GlobalKey<ScaffoldState> scaffoldkey,
@@ -580,7 +551,9 @@ class _HomePageState extends State<HomePage> {
           "paiement de packages pour ${authentication.currentUser!.displayName}"
     };
     final dio = Dio();
-
+    Navigator.of(context).pop();
+    loder = true;
+    setState(() {});
     await dio
         .post(
       "https://api.notchpay.co/payments/initialize",
@@ -589,12 +562,12 @@ class _HomePageState extends State<HomePage> {
     )
         .then((value) async {
       // print(value);
+      loder = false;
+      setState(() {});
       if (value.statusCode == 201) {
         final response = value.data;
-        // print("response : $response");
         if (response['status'] == "Accepted") {
           final secondRef = response["transaction"]['reference'];
-          // print(" secconde reférnce $secondRef");
 
           TextEditingController controllerphone = TextEditingController();
           showDialog(
@@ -634,12 +607,13 @@ class _HomePageState extends State<HomePage> {
                     child: Text('Annuler',
                         style: police.copyWith(fontWeight: FontWeight.bold)),
                   ),
-                  //  boutton
+                  //  boutton permettant de valider le paiement
                   TextButton(
                     onPressed: () async {
-                      //
-
                       if (controllerphone.text.trim().length == 9) {
+                        Navigator.of(context).pop();
+                        loder = true;
+                        setState(() {});
                         final map = {
                           'currency': 'xaf',
                           'channel': 'mobile',
@@ -656,8 +630,13 @@ class _HomePageState extends State<HomePage> {
                             options: Options(headers: header),
                           )
                               .then((valuerequest) {
-                            print(valuerequest);
-                            Navigator.pop(context);
+                            // print(valuerequest);
+                            toaster(
+                                message:
+                                    "Taper #150*50# et suivre les instructions",
+                                long: true);
+                            loder = false;
+                            setState(() {});
                             dialogInformation(context,
                                 message:
                                     "Votre transaction est en cours de traitement\nCela peut prendre jusqu'à 2 minutes",
@@ -682,7 +661,6 @@ class _HomePageState extends State<HomePage> {
                                 )
                                     .then((values) async {
                                   // print(values.data);
-                                  timer.cancel();
                                   if (values.statusCode == 200 &&
                                       values.data["transaction"]['status'] ==
                                           "complete") {
@@ -697,7 +675,8 @@ class _HomePageState extends State<HomePage> {
                                       Fluttertoast.showToast(
                                           msg:
                                               "Vous avez activé votre compte pour une duré de $jours Jours",
-                                          toastLength: Toast.LENGTH_LONG);
+                                          toastLength: Toast.LENGTH_LONG,
+                                          backgroundColor: Colors.green);
                                       await Future.delayed(
                                           const Duration(seconds: 7));
                                       Fluttertoast.cancel();
@@ -712,19 +691,19 @@ class _HomePageState extends State<HomePage> {
                         } catch (except) {
                           dialogInformation(
                             context,
-                            message: "Paiement échoué",
+                            message:
+                                "Paiement échoué veillez vérifier que votre solde est suffisant",
                             icone: const Icon(Icons.close,
                                 size: 40, color: Colors.red),
                           );
+                          loder = false;
+                          setState(() {});
                         }
                       } else {
-                        dialogInformation(
-                          context,
-                          message:
-                              "Remplissez correctement le numéro de téléphone",
-                          icone: const Icon(Icons.close,
-                              size: 40, color: Colors.red),
-                        );
+                        toaster(
+                            message: "Entez un numéro de téléphone correcte",
+                            color: Colors.red,
+                            long: true);
                       }
                     },
                     child: Text(
@@ -737,6 +716,11 @@ class _HomePageState extends State<HomePage> {
             },
           );
         } else {}
+      } else {
+        toaster(
+            message:
+                "Une Erreur est survenu: veillez vérifier votre connexion internet",
+            long: true);
       }
     });
   }
@@ -816,72 +800,7 @@ class _HomePageState extends State<HomePage> {
         print(elemnt.tomap());
         if (elemnt.etatTransaction != 2 && elemnt.etatTransaction != -1) {
           Reservation.reservationStream(elemnt.idReservation)
-              .listen((event) async {
-            // final biteUser = await bitcone(imgurl);
-            // setState(() {
-            //   markersSets.add(
-            //     Marker(
-            //       markerId: MarkerId(event.idClient),
-            //       infoWindow: InfoWindow(
-            //         title: elemnt.etatTransaction == 0
-            //             ? event.pointDepart.adresseName
-            //             : event.pointArrive.adresseName,
-            //       ),
-            //       icon: BitmapDescriptor.fromBytes(biteUser),
-            //       position: elemnt.etatTransaction == 0
-            //           ? event.pointDepart.adresseposition
-            //           : event.pointArrive.adresseposition,
-            //       onTap: () {
-            //         scaffoldKey.currentState!.showBottomSheet((context) {
-            //           return Container(
-            //             height: 500,
-            //             padding: const EdgeInsets.all(12),
-            //             decoration: BoxDecoration(
-            //               color: Colors.grey.shade200,
-            //               borderRadius: const BorderRadius.vertical(
-            //                   top: Radius.circular(20)),
-            //             ),
-            //             child: SingleChildScrollView(
-            //               child: Column(
-            //                 children: [
-            //                   InfosCard(reservation: event),
-            //                   spacerHeight(15),
-            //                   boutonText(
-            //                     context: context,
-            //                     action: () {
-            //                       Navigator.of(context).pop();
-            //                     },
-            //                     text: "Okey",
-            //                   ),
-            //                   spacerHeight(15),
-            //                   boutonText(
-            //                     context: context,
-            //                     action: () async {
-            //                       await event
-            //                           .annuletReservation()
-            //                           .then((value) {
-            //                         Navigator.pop(context);
-            //                         Navigator.pushAndRemoveUntil(
-            //                             context,
-            //                             PageTransition(
-            //                                 child: const HomePage(),
-            //                                 type:
-            //                                     PageTransitionType.leftToRight),
-            //                             (route) => false);
-            //                       });
-            //                     },
-            //                     text: "Annuler la course",
-            //                   ),
-            //                 ],
-            //               ),
-            //             ),
-            //           );
-            //         });
-            //       },
-            //     ),
-            //   );
-            // });
-          });
+              .listen((event) async {});
         }
       }
     });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -40,16 +41,20 @@ class _SignupPageState extends State<SignupPage> {
   final keyscafold = GlobalKey<ScaffoldState>();
   // function de validation du formulaire.
 
-  chauffeurRegister() async {
+  Future chauffeurRegister() async {
     if (formKey.currentState!.validate()) {
+      loader = true;
+      setState(() {});
       await ApplicationUser.userExist(
               userEmail: controlleremail.text,
               userPhonNumber: numberSubmited!.phoneNumber)
           .then((value) async {
         if (value) {
-          setState(() {
-            loader = false;
-          });
+          loader = false;
+          setState(() {});
+          toaster(
+              message:
+                  "Un chauffeur possédant ce numéro ou cet adresse email existe déja !!! ");
           FocusScope.of(keyscafold.currentContext!).unfocus();
           keyscafold.currentState!.showBottomSheet((context) {
             return Container(
@@ -86,9 +91,8 @@ class _SignupPageState extends State<SignupPage> {
                     boutonText(
                         context: context,
                         action: () {
-                          setState(() {
-                            loader = false;
-                          });
+                          loader = false;
+                          setState(() {});
                           Navigator.of(context).pop();
                         },
                         text: "Annuler")
@@ -125,32 +129,10 @@ class _SignupPageState extends State<SignupPage> {
               );
             },
           );
+          loader = false;
+          setState(() {});
         }
       });
-
-      // await chauffeur.loginChauffeur(controllerMotdePasse.text).then((value) {
-      //   if (value == null) {
-      //     Navigator.of(context).pushReplacement(
-      //       PageTransition(
-      //         child: TransitionChauffeurVehicule(
-      //           applicationUser: ApplicationUser(
-      //               userEmail: authentication.currentUser!.email!,
-      //               userid: authentication.currentUser!.uid,
-      //               userName: authentication.currentUser!.displayName!),
-      //         ),
-      //         type: PageTransitionType.leftToRight,
-      //       ),
-      //     );
-      //     setState(() {
-      //       formKey.currentState!.reset();
-      //     });
-      //   } else {
-      //     getsnac(
-      //       title: "Erreur d'enrégistrement",
-      //       msg: value.toString(),
-      //     );
-      //   }
-      // });
     }
   }
 
@@ -237,9 +219,9 @@ class _SignupPageState extends State<SignupPage> {
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 4),
                                 ),
-                                onPressed: () {
-                                  showload(context);
-                                  chauffeurRegister();
+                                onPressed: () async {
+                                  await chauffeurRegister();
+                                  loader = false;
                                   setState(() {});
                                 }),
                           ),

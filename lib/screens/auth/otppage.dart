@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
@@ -24,6 +25,7 @@ class OtpPage extends StatefulWidget {
 }
 
 class _OtpPageState extends State<OtpPage> {
+  bool loading = false;
   String smsCode = "";
   @override
   Widget build(BuildContext context) {
@@ -104,27 +106,50 @@ class _OtpPageState extends State<OtpPage> {
                 const SizedBox(height: 120),
                 DelayedAnimation(
                     delay: 3000,
-                    child: boutonText(
-                        context: context,
-                        action: () {
-                          if (smsCode.length == 6) {
-                            showload(context);
-                            if (widget.isauthentication) {
-                              ApplicationUser.validateOPT(context,
-                                  smsCode: smsCode,
-                                  verificationId: widget.verificationId);
-                            } else {
-                              Chauffeur chauffeur = widget.chauffeur!;
-                              Chauffeur.validateOPT(
-                                chauffeur,
-                                context,
-                                smsCode: smsCode,
-                                verificationId: widget.verificationId,
-                              );
-                            }
-                          }
-                        },
-                        text: 'Valider'.toUpperCase())),
+                    child: loading
+                        ? const SizedBox(
+                            height: 70,
+                            width: double.infinity,
+                            child: Center(
+                              child: LoadingComponen(),
+                            ),
+                          )
+                        : boutonText(
+                            context: context,
+                            action: () {
+                              if (loading) {
+                                Fluttertoast.showToast(
+                                    msg: "Chargement en cours",
+                                    toastLength: Toast.LENGTH_SHORT);
+                              } else {
+                                if (smsCode.length == 6) {
+                                  loading = true;
+                                  setState(() {});
+                                  if (widget.isauthentication) {
+                                    ApplicationUser.validateOPT(context,
+                                        smsCode: smsCode,
+                                        verificationId: widget.verificationId);
+                                  } else {
+                                    Chauffeur chauffeur = widget.chauffeur!;
+                                    Chauffeur.validateOPT(
+                                      chauffeur,
+                                      context,
+                                      smsCode: smsCode,
+                                      verificationId: widget.verificationId,
+                                    );
+                                  }
+                                  loading = false;
+                                  setState(() {});
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Remplissez correctement le code",
+                                      toastLength: Toast.LENGTH_LONG,
+                                      backgroundColor: Colors.red,
+                                      fontSize: 16);
+                                }
+                              }
+                            },
+                            text: 'Valider'.toUpperCase())),
                 const SizedBox(height: 10),
               ],
             ),

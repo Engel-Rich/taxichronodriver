@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:taxischronodriver/controllers/useapp_controller.dart';
@@ -75,11 +76,10 @@ class Chauffeur extends ApplicationUser {
 
   // function de reception de code et de demande de renvoie du nouveau code;
 
-  static loginNumber(
+  static Future loginNumber(
     Chauffeur chauffeurOtp, {
     required BuildContext context,
     required Function(String verificationId, int? value1) onCodeSend,
-    // required Function(String value) autoRetrieval,
   }) async {
     await authentication.verifyPhoneNumber(
       phoneNumber: chauffeurOtp.userTelephone,
@@ -100,6 +100,11 @@ class Chauffeur extends ApplicationUser {
       },
       verificationFailed: (FirebaseAuthException except) {
         debugPrint(except.code);
+        toaster(
+            message:
+                "Une Erreur est survenus l'ors de l'inscription Veillez reéssayer",
+            long: true,
+            color: Colors.red);
       },
       codeSent: onCodeSend,
       codeAutoRetrievalTimeout: (phone) {},

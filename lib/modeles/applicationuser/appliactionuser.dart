@@ -247,7 +247,7 @@ class ApplicationUser {
     }
   }
 
-  static authenticatePhonNumber(
+  static Future authenticatePhonNumber(
       {required String phonNumber,
       required void Function(String, int?) onCodeSend,
       required void Function(PhoneAuthCredential) verificationCompleted,

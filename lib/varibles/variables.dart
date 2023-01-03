@@ -6,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -242,3 +243,10 @@ showload(context) {
         ]);
       });
 }
+
+toaster({required String message, Color? color, bool? long}) =>
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength:
+            long != null && long ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT,
+        backgroundColor: color ?? Colors.grey.shade900.withOpacity(0.8));
