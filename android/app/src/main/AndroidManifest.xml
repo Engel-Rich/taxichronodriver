@@ -8,7 +8,7 @@
    <application
         android:label="taxischronodriver"
         android:name="${applicationName}"
-        android:extractNativeLibs=false
+        android:extractNativeLibs="false"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyDRiuLYKs1ymgiW97p3ybAuQLOQcBDqUvg"/>
