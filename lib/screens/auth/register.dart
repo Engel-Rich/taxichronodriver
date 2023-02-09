@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -110,7 +110,7 @@ class _SignupPageState extends State<SignupPage> {
             userCni: controllerCNI.text,
             expireCniDate: expireCni,
             passeword: controllerMotdePasse.text,
-            numeroPermi: controllerExpirPermi.text,
+            numeroPermi: controllerpermi.text,
             expirePermiDate: expirePermi,
           );
           await Chauffeur.loginNumber(
@@ -129,8 +129,8 @@ class _SignupPageState extends State<SignupPage> {
               );
             },
           );
-          loader = false;
-          setState(() {});
+          // loader = false;
+          // setState(() {});
         }
       });
     }

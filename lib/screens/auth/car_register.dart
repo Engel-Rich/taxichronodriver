@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/autres/vehicule.dart';
 import 'package:taxischronodriver/screens/delayed_animation.dart';
 import 'package:taxischronodriver/screens/homepage.dart';
 import 'package:taxischronodriver/services/mapservice.dart';
+import 'package:taxischronodriver/services/transitionchauffeur.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 class RequestCar extends StatefulWidget {
@@ -144,18 +146,22 @@ class _RequestCarState extends State<RequestCar> {
           statut: false,
           position: GooGleMapServices.currentPosition,
           token: " ");
-      await vehicule.requestSave().then((value) {
-        // print(value);
+      await vehicule.requestSave().then((value) async {
         if (value == true) {
+          await ApplicationUser.infos(authentication.currentUser!.uid)
+              .then((value) {
+            Navigator.of(context).pushReplacement(
+              PageTransition(
+                child: TransitionChauffeurVehicule(
+                  applicationUser: value,
+                ),
+                type: PageTransitionType.leftToRight,
+              ),
+            );
+          });
           setState(() {
             loader = false;
           });
-          Navigator.of(context).pushReplacement(
-            PageTransition(
-              child: const HomePage(),
-              type: PageTransitionType.leftToRight,
-            ),
-          );
         } else if (value == "véhicule déja existant ce véhicule existe déjà") {
           setState(() {
             loader = false;

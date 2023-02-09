@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -195,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                       //     child: Row(
                       //       mainAxisAlignment: MainAxisAlignment.center,
                       //       children: [
-                      //         const FaIcon(FontAwesomeIcons.apple,
+                      //         const Icon(Icons.apple,
                       //             color: Colors.black),
                       //         const SizedBox(width: 10),
                       //         Text(
@@ -227,8 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const FaIcon(FontAwesomeIcons.phone,
-                                  color: Colors.black),
+                              const Icon(Icons.phone, color: Colors.black),
                               const SizedBox(width: 10),
                               Text(
                                 'Numéro de téléphone',
@@ -313,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
               child: TextFormField(
                 controller: controllerEmail,
                 decoration: InputDecoration(
-                  icon: const FaIcon(Icons.email),
+                  icon: const Icon(Icons.email),
                   labelText: 'Votre e-mail',
                   labelStyle: TextStyle(
                     color: Colors.grey[400],

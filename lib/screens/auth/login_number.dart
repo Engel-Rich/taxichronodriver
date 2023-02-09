@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +10,8 @@ import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
 import 'package:taxischronodriver/screens/auth/otppage.dart';
+import 'package:taxischronodriver/screens/homepage.dart';
+import 'package:taxischronodriver/services/transitionchauffeur.dart';
 import 'package:taxischronodriver/varibles/variables.dart';
 
 import '../delayed_animation.dart';
@@ -88,7 +90,7 @@ class _LoginNumberState extends State<LoginNumber> {
                                     13) {
                               loader = true;
                               setState(() {});
-                              print(loader);
+                              // print(loader);
                               await ApplicationUser.authenticatePhonNumber(
                                 phonNumber: numberSubmited!.phoneNumber!,
                                 onCodeSend: (verificationId, resendToken) {
@@ -103,11 +105,18 @@ class _LoginNumberState extends State<LoginNumber> {
                                 verificationCompleted: (credential) async {
                                   final auth = await authentication
                                       .signInWithCredential(credential);
-                                  Get.find<ChauffeurController>()
-                                          .applicationUser
-                                          .value =
-                                      await Chauffeur.chauffeurInfos(
-                                          auth.user!.uid);
+                                  await Chauffeur.chauffeurInfos(auth.user!.uid)
+                                      .then((chauff) {
+                                    Get.find<ChauffeurController>()
+                                        .applicationUser
+                                        .value = chauff;
+                                    Navigator.of(context).pushReplacement(
+                                      PageTransition(
+                                          child: TransitionChauffeurVehicule(
+                                              applicationUser: chauff),
+                                          type: PageTransitionType.leftToRight),
+                                    );
+                                  });
                                 },
                                 verificationFailed: (except) {
                                   loader = false;
@@ -125,7 +134,7 @@ class _LoginNumberState extends State<LoginNumber> {
 
                               loader = false;
                               setState(() {});
-                              print(loader);
+                              // print(loader);
                             } else {
                               toaster(
                                   message:

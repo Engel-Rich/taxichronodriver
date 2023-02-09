@@ -205,15 +205,15 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Positioned(
-                            top: 110,
-                            right: 20,
-                            child: Icon(
-                              Icons.settings,
-                              color: Colors.grey[700],
-                              size: 30,
-                            ),
-                          ),
+                          // Positioned(
+                          //   top: 110,
+                          //   right: 20,
+                          //   child: Icon(
+                          //     Icons.settings,
+                          //     color: Colors.grey[700],
+                          //     size: 30,
+                          //   ),
+                          // ),
                           Positioned(
                             top: 0,
                             left: 0,

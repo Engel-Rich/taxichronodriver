@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -45,7 +45,7 @@ getsnac(
           Text(title, style: police.copyWith(fontWeight: FontWeight.w800)),
       messageText: Text(msg, style: police),
       icon: icons ??
-          FaIcon(
+          Icon(
             error ? Icons.error : Icons.check,
             color: error ? Colors.red : Colors.greenAccent,
             size: 30,
@@ -108,7 +108,7 @@ TextFormField champsdeRecherche(
           borderSide: BorderSide(color: blanc),
           borderRadius: BorderRadius.circular(15),
         ),
-        icon: FaIcon(
+        icon: Icon(
           iconData ?? Icons.location_on_outlined,
           size: 30,
         ),

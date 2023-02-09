@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:taxischronodriver/controllers/useapp_controller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
 import 'package:taxischronodriver/modeles/applicationuser/chauffeur.dart';
+import 'package:taxischronodriver/modeles/autres/vehicule.dart';
 import 'package:taxischronodriver/screens/auth/car_register.dart';
 import 'package:taxischronodriver/screens/homepage.dart';
 import 'package:taxischronodriver/services/mapservice.dart';
@@ -43,16 +44,27 @@ class _TransitionChauffeurVehiculeState
       try {
         await Chauffeur.havehicule(authentication.currentUser!.uid)
             .then((value) async {
+          debugPrint('car : ${value!.toMap()}');
           if (value != null) {
             setState(() => haveVehicule = true);
             setState(() {
               loafinTimerend = false;
             });
-            if (value.activeEndDate.compareTo(DateTime.now()) > 0) {
-              await value.setActiveState(false, value.activeEndDate);
+            final comparaison = value.activeEndDate.compareTo(DateTime.now());
+            if (comparaison < 0) {
+              debugPrint('la date viens avant');
+              try {
+                await Vehicule.setActiveState(
+                    false,
+                    value.activeEndDate.millisecondsSinceEpoch,
+                    value.chauffeurId);
+              } catch (e) {
+                debugPrint("Erreur de mise à jour de la date : $e");
+              }
+            } else {
+              debugPrint('la date viens après');
             }
-          }
-          {
+          } else {
             setState(() {
               haveVehicule = false;
             });
@@ -113,7 +125,7 @@ class _TransitionChauffeurVehiculeState
                         action: () {
                           haveCar();
                         },
-                        text: 'Rechergé')
+                        text: 'Rechargé')
                   ],
                 ),
               ),

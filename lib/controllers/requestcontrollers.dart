@@ -6,7 +6,7 @@ import '../varibles/variables.dart';
 class ResquestController extends GetxController {
   RxList<Reservation> reservationListobserv = <Reservation>[].obs;
 
-  List<Reservation> get reservations => reservationListobserv.value;
+  List<Reservation> get reservations => reservationListobserv;
 
   @override
   void onInit() {

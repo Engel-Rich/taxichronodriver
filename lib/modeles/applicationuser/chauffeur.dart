@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
@@ -70,6 +69,10 @@ class Chauffeur extends ApplicationUser {
               ),
               type: PageTransitionType.leftToRight));
         });
+      } else {
+        toaster(
+            message: 'Erreur d\'inscription veillez reéssayer',
+            color: Colors.red);
       }
     });
   }
@@ -88,13 +91,25 @@ class Chauffeur extends ApplicationUser {
             .signInWithCredential(credential)
             .then((value) async {
           if (value.user != null) {
+            chauffeurOtp.userid = value.user!.uid;
             await value.user!.updateEmail(chauffeurOtp.userEmail);
             await value.user!.updateDisplayName(chauffeurOtp.userName);
             await value.user!.updatePassword(chauffeurOtp.passeword!);
             await chauffeurOtp.saveUser().then((value) {
               Get.find<ChauffeurController>().applicationUser.value =
                   chauffeurOtp;
+              Navigator.of(context).pushReplacement(
+                PageTransition(
+                  child: TransitionChauffeurVehicule(
+                      applicationUser: chauffeurOtp),
+                  type: PageTransitionType.leftToRight,
+                ),
+              );
             });
+          } else {
+            toaster(
+                message: 'Erreur d\'inscription veillez reéssayer',
+                color: Colors.red);
           }
         });
       },
@@ -207,13 +222,14 @@ class Chauffeur extends ApplicationUser {
 
 // vérifier si l'utilisateur a un véhicule.
   static Future<Vehicule?> havehicule(userid) async {
-    var result;
+    Vehicule? result;
     await datatbase.ref("Vehicules").child(userid).get().then((value) {
       if (value.exists) {
-        // print(Vehicule.froJson(value.value).toMap());
+        debugPrint(Vehicule.froJson(value.value).toMap().toString());
         try {
           result = Vehicule.froJson(value.value);
         } catch (e) {
+          debugPrint(e.toString());
           result = null;
         }
       } else {
@@ -226,49 +242,49 @@ class Chauffeur extends ApplicationUser {
 // fin de la classe
 }
 
-class Abonnement {
-  DateTime? paiementdate;
-  String idChauffeur;
-  double montant;
+// class Abonnement {
+//   DateTime? paiementdate;
+//   String idChauffeur;
+//   double montant;
 
-  Abonnement(
-      {required this.idChauffeur, required this.montant, this.paiementdate});
+//   Abonnement(  
+//       {required this.idChauffeur, required this.montant, this.paiementdate});
 
-  Map<String, dynamic> toMap() => {
-        if (paiementdate != null)
-          'paiementdate': Timestamp.fromDate(paiementdate!),
-        "montant": montant,
-        'idChauffeur': idChauffeur,
-      };
-  factory Abonnement.fromMap(map) => Abonnement(
-        idChauffeur: map['idChauffeur'],
-        montant: map['montant'],
-        paiementdate: (map['paiementdate'] as Timestamp).toDate(),
-      );
+//   Map<String, dynamic> toMap() => {
+//         if (paiementdate != null)
+//           'paiementdate': Timestamp.fromDate(paiementdate!),
+//         "montant": montant,
+//         'idChauffeur': idChauffeur,
+//       };
+//   factory Abonnement.fromMap(map) => Abonnement(
+//         idChauffeur: map['idChauffeur'],
+//         montant: map['montant'],
+//         paiementdate: (map['paiementdate'] as Timestamp).toDate(),
+//       );
 
-  Future makePaiement() async {
-    await firestore.collection("Abonnement").doc(idChauffeur).set(toMap());
-    await firestore
-        .collection("Chauffeur")
-        .doc(idChauffeur)
-        .update({"active": true});
-  }
+//   Future makePaiement() async {
+//     await firestore.collection("Abonnement").doc(idChauffeur).set(toMap());
+//     await firestore
+//         .collection("Chauffeur")
+//         .doc(idChauffeur)
+//         .update({"active": true});
+//   }
 
-  static endAbonnement(idChauf) async {
-    await firestore
-        .collection("Abonnement")
-        .doc(idChauf)
-        .get()
-        .then((value) async {
-      if (value.exists) {
-        final Abonnement abonnement = Abonnement.fromMap(value.data()!);
-        if (abonnement.paiementdate!.compareTo(DateTime.now()) >= 0) {
-          await firestore
-              .collection("Chauffeur")
-              .doc(idChauf)
-              .update({"active": false});
-        }
-      }
-    });
-  }
-}
+//   static endAbonnement(idChauf) async {
+//     await firestore
+//         .collection("Abonnement")
+//         .doc(idChauf)
+//         .get()
+//         .then((value) async {
+//       if (value.exists) {
+//         final Abonnement abonnement = Abonnement.fromMap(value.data()!);
+//         if (abonnement.paiementdate!.compareTo(DateTime.now()) >= 0) {
+//           await firestore
+//               .collection("Chauffeur")
+//               .doc(idChauf)
+//               .update({"active": false});
+//         }
+//       }
+//     });
+//   }
+// }

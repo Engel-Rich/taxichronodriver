@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
@@ -16,8 +16,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-// import 'package:page_transition/page_transition.dart';
-// import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:taxischronodriver/controllers/requestcontrollers.dart';
 import 'package:taxischronodriver/controllers/vehiculecontroller.dart';
 import 'package:taxischronodriver/modeles/applicationuser/appliactionuser.dart';
@@ -26,9 +24,6 @@ import 'package:taxischronodriver/modeles/autres/reservation.dart';
 import 'package:taxischronodriver/modeles/autres/transaction.dart';
 import 'package:taxischronodriver/modeles/autres/vehicule.dart';
 import 'package:taxischronodriver/screens/component/courswaiting.dart';
-// import 'package:taxischronodriver/notifications/confi_messenging.dart';
-// import 'package:taxischronodriver/screens/component/infocard.dart';
-// import 'package:taxischronodriver/screens/etineraires.dart';
 
 import 'package:taxischronodriver/screens/component/sidebar.dart';
 import 'package:taxischronodriver/services/mapservice.dart';
@@ -126,7 +121,6 @@ class _HomePageState extends State<HomePage> {
     initializeFirebaseMessaging();
     Get.put<ChauffeurController>(ChauffeurController());
     fromCurrentPosition();
-
     transactionEncour();
     super.initState();
   }
@@ -204,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                   color: dredColor, shape: BoxShape.circle),
-                              child: const FaIcon(
+                              child: const Icon(
                                 Icons.menu,
                                 size: 30,
                               ),
@@ -418,6 +412,64 @@ class _HomePageState extends State<HomePage> {
           spacerHeight(30),
           ListTile(
             onTap: () async {
+              loder = true;
+              setState(() {});
+              await datatbase
+                  .ref('Vehicules')
+                  .child(authentication.currentUser!.uid)
+                  .child("assaie")
+                  .get()
+                  .then((value) async {
+                if (value.exists) {
+                  Fluttertoast.showToast(
+                      msg: 'Vous avez déjà utilisé votre temps d\'éssaie',
+                      toastLength: Toast.LENGTH_LONG);
+                  loder = false;
+                  setState(() {});
+                } else {
+                  await Chauffeur.havehicule(authentication.currentUser!.uid)
+                      .then((value) async {
+                    final date = DateTime.now().add(const Duration(days: 7));
+                    await Vehicule.setActiveState(
+                        true, date.millisecondsSinceEpoch, value!.chauffeurId);
+                  });
+
+                  await datatbase
+                      .ref('Vehicules')
+                      .child(authentication.currentUser!.uid)
+                      .update({"assaie": true}).then((value) {
+                    loder = false;
+                    setState(() {});
+                    Fluttertoast.showToast(
+                        msg:
+                            "Vous avez activé votre période d'éssaie avec succes",
+                        toastLength: Toast.LENGTH_LONG);
+                    Navigator.of(context).pop();
+                  });
+                }
+              });
+              // await payement(jours: 8, prix: 2500, scaffoldkey: scaffoldKey);
+            },
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: dredColor,
+                )),
+            title: Text(
+              "Période d'éssaie",
+              style: police.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            subtitle: Text("Valide 7 jours", style: police),
+            leading: CircleAvatar(
+              backgroundColor: dredColor,
+              child: Icon(Icons.local_taxi, color: blanc),
+            ),
+          ),
+          spacerHeight(7.5),
+          const Divider(),
+          spacerHeight(7.5),
+          ListTile(
+            onTap: () async {
               await payement(jours: 8, prix: 2500, scaffoldkey: scaffoldKey);
             },
             shape: RoundedRectangleBorder(
@@ -554,174 +606,196 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop();
     loder = true;
     setState(() {});
-    await dio
-        .post(
-      "https://api.notchpay.co/payments/initialize",
-      queryParameters: mapPey,
-      options: Options(headers: header),
-    )
-        .then((value) async {
-      // print(value);
-      loder = false;
-      setState(() {});
-      if (value.statusCode == 201) {
-        final response = value.data;
-        if (response['status'] == "Accepted") {
-          final secondRef = response["transaction"]['reference'];
+    try {
+      await dio
+          .post(
+        "https://api.notchpay.co/payments/initialize",
+        queryParameters: mapPey,
+        options: Options(headers: header),
+      )
+          .then((value) async {
+        // print(value);
+        loder = false;
+        setState(() {});
+        if (value.statusCode == 201) {
+          final response = value.data;
+          debugPrint(response.toString());
+          if (response['status'] == "Accepted") {
+            final secondRef = response["transaction"]['reference'];
 
-          TextEditingController controllerphone = TextEditingController();
-          showDialog(
-            context: scaffoldkey.currentContext!,
-            barrierDismissible: false,
-            builder: (context) {
-              return AlertDialog(
-                contentPadding: const EdgeInsets.all(8),
-                titlePadding: const EdgeInsets.all(12),
-                title: Text(
-                  'Valider le paiement',
-                  style: police.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                content: TextFormField(
-                  controller: controllerphone,
-                  maxLength: 9,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  style: police.copyWith(fontWeight: FontWeight.bold),
-                  decoration: InputDecoration(
-                    prefix: Text('+237', style: police),
-                    hintText: "number",
-                    hintStyle: police,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
+            TextEditingController controllerphone = TextEditingController();
+            showDialog(
+              context: scaffoldkey.currentContext!,
+              barrierDismissible: false,
+              builder: (context) {
+                return AlertDialog(
+                  contentPadding: const EdgeInsets.all(8),
+                  titlePadding: const EdgeInsets.all(12),
+                  title: Text(
+                    'Valider le paiement',
+                    style: police.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Annuler',
-                        style: police.copyWith(fontWeight: FontWeight.bold)),
+                  content: TextFormField(
+                    controller: controllerphone,
+                    maxLength: 9,
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    style: police.copyWith(fontWeight: FontWeight.bold),
+                    decoration: InputDecoration(
+                      prefix: Text('+237', style: police),
+                      hintText: "number",
+                      hintStyle: police,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
                   ),
-                  //  boutton permettant de valider le paiement
-                  TextButton(
-                    onPressed: () async {
-                      if (controllerphone.text.trim().length == 9) {
+                  actions: [
+                    TextButton(
+                      onPressed: () {
                         Navigator.of(context).pop();
-                        loder = true;
-                        setState(() {});
-                        final map = {
-                          'currency': 'xaf',
-                          'channel': 'mobile',
-                          'data': {
-                            'phone': '+237${controllerphone.text}',
-                          },
-                        };
-                        try {
-                          await dio
-                              .put(
-                            'https://api.notchpay.co/payments/$secondRef',
-                            queryParameters: map,
-                            options: Options(headers: header),
-                          )
-                              .then((valuerequest) {
-                            // print(valuerequest);
-                            // toaster(
-                            //     message:
-                            //         "Taper #150*50# et suivre les instructions",
-                            //     long: true);
+                      },
+                      child: Text('Annuler',
+                          style: police.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    //  boutton permettant de valider le paiement
+                    TextButton(
+                      onPressed: () async {
+                        if (controllerphone.text.trim().length == 9) {
+                          Navigator.of(context).pop();
+                          loder = true;
+                          setState(() {});
+                          final map = {
+                            'currency': 'xaf',
+                            'channel': 'mobile',
+                            'data': {
+                              'phone': '+237${controllerphone.text}',
+                            },
+                          };
+                          try {
+                            await dio
+                                .put(
+                              'https://api.notchpay.co/payments/$secondRef',
+                              queryParameters: map,
+                              options: Options(headers: header),
+                            )
+                                .then((valuerequest) {
+                              // print(valuerequest);
+                              // toaster(
+                              //     message:
+                              //         "Taper #150*50# et suivre les instructions",
+                              //     long: true);
+                              loder = false;
+                              setState(() {});
+                              toaster(
+                                  message:
+                                      "Votre transaction est en cours de traitement\nCela peut prendre jusqu'à 2 minutes",
+                                  color: Colors.blueAccent,
+                                  long: true);
+                              // dialogInformation(context,
+                              //     message:
+                              //         "Votre transaction est en cours de traitement\nCela peut prendre jusqu'à 2 minutes",
+                              //     icone: Icon(
+                              //       Icons.run_circle,
+                              //       color: blanc,
+                              //     ));
+                              if (valuerequest.statusCode == 202) {
+                                var counta = 0;
+                                Timer.periodic(const Duration(seconds: 1),
+                                    (timer) async {
+                                  counta++;
+                                  if (counta == 180) {
+                                    timer.cancel();
+                                  }
+
+                                  await dio
+                                      .get(
+                                    "https://api.notchpay.co/payments/$secondRef",
+                                    queryParameters: {"currency": "xaf"},
+                                    options: Options(headers: header),
+                                  )
+                                      .then((values) async {
+                                    // print(values.data);
+                                    if (values.statusCode == 200 &&
+                                        values.data["transaction"]['status'] ==
+                                            "complete") {
+                                      timer.cancel();
+                                      await Chauffeur.havehicule(
+                                              authentication.currentUser!.uid)
+                                          .then((value) async {
+                                        final date = DateTime.now()
+                                            .add(Duration(days: jours));
+                                        await Vehicule.setActiveState(
+                                            true,
+                                            date.millisecondsSinceEpoch,
+                                            value!.chauffeurId);
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "Vous avez activé votre compte pour une duré de $jours Jours",
+                                            toastLength: Toast.LENGTH_LONG,
+                                            backgroundColor: Colors.green);
+                                        await Future.delayed(
+                                            const Duration(seconds: 7));
+                                        Fluttertoast.cancel();
+                                      });
+                                    }
+                                  });
+                                });
+                              } else {
+                                throw Exception("Erreur de paiement");
+                              }
+                            });
+                          } catch (except) {
+                            toaster(
+                                message:
+                                    "Paiement échoué veillez vérifier que votre solde est suffisant",
+                                color: Colors.red,
+                                long: true);
+                            // dialogInformation(
+                            //   context,
+                            //   message:
+                            //       "Paiement échoué veillez vérifier que votre solde est suffisant",
+                            //   icone: const Icon(Icons.close,
+                            //       size: 40, color: Colors.red),
+                            // );
                             loder = false;
                             setState(() {});
-                            dialogInformation(context,
-                                message:
-                                    "Votre transaction est en cours de traitement\nCela peut prendre jusqu'à 2 minutes",
-                                icone: Icon(
-                                  Icons.run_circle,
-                                  color: blanc,
-                                ));
-                            if (valuerequest.statusCode == 202) {
-                              var counta = 0;
-                              Timer.periodic(const Duration(seconds: 1),
-                                  (timer) async {
-                                counta++;
-                                if (counta == 180) {
-                                  timer.cancel();
-                                }
-
-                                await dio
-                                    .get(
-                                  "https://api.notchpay.co/payments/$secondRef",
-                                  queryParameters: {"currency": "xaf"},
-                                  options: Options(headers: header),
-                                )
-                                    .then((values) async {
-                                  // print(values.data);
-                                  if (values.statusCode == 200 &&
-                                      values.data["transaction"]['status'] ==
-                                          "complete") {
-                                    timer.cancel();
-                                    await Chauffeur.havehicule(
-                                            authentication.currentUser!.uid)
-                                        .then((value) async {
-                                      final date = DateTime.now()
-                                          .add(Duration(days: jours));
-                                      await value!.setActiveState(
-                                          true, date.millisecondsSinceEpoch);
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              "Vous avez activé votre compte pour une duré de $jours Jours",
-                                          toastLength: Toast.LENGTH_LONG,
-                                          backgroundColor: Colors.green);
-                                      await Future.delayed(
-                                          const Duration(seconds: 7));
-                                      Fluttertoast.cancel();
-                                    });
-                                  }
-                                });
-                              });
-                            } else {
-                              throw Exception("Erreur de paiement");
-                            }
-                          });
-                        } catch (except) {
-                          dialogInformation(
-                            context,
-                            message:
-                                "Paiement échoué veillez vérifier que votre solde est suffisant",
-                            icone: const Icon(Icons.close,
-                                size: 40, color: Colors.red),
-                          );
-                          loder = false;
-                          setState(() {});
+                          }
+                        } else {
+                          toaster(
+                              message: "Entez un numéro de téléphone correcte",
+                              color: Colors.red,
+                              long: true);
                         }
-                      } else {
-                        toaster(
-                            message: "Entez un numéro de téléphone correcte",
-                            color: Colors.red,
-                            long: true);
-                      }
-                    },
-                    child: Text(
-                      'valider',
-                      style: police.copyWith(fontWeight: FontWeight.bold),
+                      },
+                      child: Text(
+                        'valider',
+                        style: police.copyWith(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
-          );
-        } else {
-          toaster(
-              message:
-                  "Une Erreur est survenu: veillez vérifier votre connexion internet",
-              long: true);
-        }
-      } else {}
-    });
+                  ],
+                );
+              },
+            );
+          } else {
+            toaster(
+                message:
+                    "Une Erreur est survenu: veillez vérifier votre connexion internet",
+                long: true);
+          }
+        } else {}
+      });
+    } catch (e) {
+      loder = false;
+      setState(() {});
+      toaster(
+          message:
+              "Une Erreur est survenu: veillez vérifier votre connexion internet",
+          long: true);
+    }
   }
 
   Future<dynamic> dialogInformation(BuildContext context,
@@ -796,7 +870,7 @@ class _HomePageState extends State<HomePage> {
         transactionAppList = event;
       });
       for (var elemnt in event) {
-        print(elemnt.tomap());
+        // print(elemnt.tomap());
         if (elemnt.etatTransaction != 2 && elemnt.etatTransaction != -1) {
           Reservation.reservationStream(elemnt.idReservation)
               .listen((event) async {});

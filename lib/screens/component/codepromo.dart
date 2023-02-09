@@ -121,7 +121,7 @@ class _CodePromocomponentState extends State<CodePromocomponent> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: const Icon(Icons.check, size: 40),
+                icon: const Icon(Icons.close, size: 40),
                 label: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text(
@@ -130,7 +130,7 @@ class _CodePromocomponentState extends State<CodePromocomponent> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: dredColor,
+                  backgroundColor: Colors.red,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),

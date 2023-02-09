@@ -64,7 +64,6 @@ class Vehicule {
 
 // demande d'enrégistrement du véhicule
   Future requestSave() async {
-    // print(toMap());
     await datatbase
         .ref("Vehicules")
         .child(chauffeurId)
@@ -73,15 +72,15 @@ class Vehicule {
       if (value.exists) {
         return "véhicule déja existant ce véhicule existe déjà";
       } else {
-        return await datatbase
+        await datatbase
             .ref("Vehicules")
             .child(chauffeurId)
             .set(toMap())
             .then((value) {
           Get.find<VehiculeController>().currentVehicul.value = this;
-          return true;
         });
       }
+      return true;
     });
   }
 
@@ -107,7 +106,7 @@ class Vehicule {
     });
   }
 
-  setActiveState(bool etatActuel, jours) async {
+  static setActiveState(bool etatActuel, jours, chauffeurId) async {
     await datatbase
         .ref("Vehicules")
         .child(chauffeurId)
@@ -125,6 +124,7 @@ class Vehicule {
         } catch (e) {
           null;
         }
+        return null;
       });
 
   static Future<List<Vehicule?>> vehiculRequette() =>
